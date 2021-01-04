@@ -34,12 +34,20 @@ Hivatalos Gazebo tutorialok: [link](http://gazebosim.org/tutorials).
 A Gazebo-t megnyitva a következő képernyőt látjuk:
 ![alt text][image2]
 
+Részletes angol tutorial a UI-ról: [link](http://gazebosim.org/tutorials?cat=guided_b&tut=guided_b2)
+
 A bal oldali panel (zöld) mutatja a szimulációban lévő objektumok hierarchiáját.
 Fent (piros) az eszköztár, mozgatás, forgatás, kamera beállítások, stb.
 Alul (barna) a szimuláció megállítása, elindítása, real-time faktor és időbélyegek.
 Középen (kék) a szimuláció 3D-s világa.
 
 ## Egyszerű modellek, modell library
+
+Egyszerű gyakorlatok:
+- helyezzünk egy kockát a szimulációba
+- állítsuk meg a fizikai szimulációt, emeljük fel és forgassuk el a kockát
+- engedélyezzük újra a szimulációt, hagyjuk leesni a kockát
+- adjunk adott nagyságú erőt a kockára
 
 ## Building editor
 
@@ -69,7 +77,7 @@ xxx
 
 
 
-http://gazebosim.org/tutorials?cat=guided_b&tut=guided_b2
+
 
 
 
