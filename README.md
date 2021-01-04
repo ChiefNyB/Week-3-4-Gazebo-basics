@@ -2,14 +2,18 @@
 
 [image1]: ./assets/gazebo_1.png "Gazebo"
 [image2]: ./assets/gazebo_2.png "Gazebo"
-
-[image3]: ./assets/vcxsrv_1.png "VcXsrv"
-[image4]: ./assets/vcxsrv_2.png "VcXsrv"
-[image5]: ./assets/vcxsrv_3.png "VcXsrv"
-[image6]: ./assets/rqt_1.png "rqt"
-[image7]: ./assets/rqt_2.png "rqt"
-[image8]: ./assets/rqt_3.png "rqt"
-[image9]: ./assets/rqt_4.png "rqt" 
+[image3]: ./assets/gazebo_3.png "Gazebo"
+[image4]: ./assets/gazebo_4.png "Gazebo"
+[image5]: ./assets/gazebo_5.png "Gazebo"
+[image6]: ./assets/gazebo_6.png "Gazebo"
+[image7]: ./assets/gazebo_7.png "Gazebo"
+[image8]: ./assets/gazebo_8.png "Gazebo"
+[image9]: ./assets/gazebo_9.png "Gazebo" 
+[image10]: ./assets/gazebo_10.png "Gazebo" 
+[image11]: ./assets/gazebo_11.png "Gazebo" 
+[image12]: ./assets/gazebo_12.png "Gazebo" 
+[image13]: ./assets/gazebo_13.png "Gazebo" 
+[image14]: ./assets/gazebo_14.png "Gazebo" 
 
 
 # 3. hét - Gazebo és URDF
@@ -49,14 +53,59 @@ Egyszerű gyakorlatok:
 - engedélyezzük újra a szimulációt, hagyjuk leesni a kockát
 - adjunk adott nagyságú erőt a kockára
 
+![alt text][image3]
+![alt text][image4]
+
+## Model editor
+
+![alt text][image6]
+
+![alt text][image5]
+
+https://github.com/andreasBihlmaier/pysdf
+
+```console
+david@DavidsLenovoX1:~/bme_catkin_ws$ rosrun pysdf sdf2urdf.py -h
+usage: sdf2urdf.py [-h] [-p PLOT] [--no-prefix] sdf urdf
+
+positional arguments:
+  sdf                   SDF file to convert
+  urdf                  Resulting URDF file to be written
+
+optional arguments:
+  -h, --help            show this help message and exit
+  -p PLOT, --plot PLOT  Plot SDF to file
+  --no-prefix           Do not use model name as name prefix
+```
+
 ## Building editor
 
+![alt text][image7]
 
-xxx
+![alt text][image8]
+
+![alt text][image9]
+
+![alt text][image10]
+
+![alt text][image11]
+
+![alt text][image12]
+
+![alt text][image13]
+
+
+gazebo MyWorld.world
+
+## Launchfile
 
 ---
 
 # RViz
+
+## URDF megnyitása az RVizben
+
+rosrun pysdf sdf2urdf.py /home/david/model_editor_models/simple_model/model.sdf /home/david/model_editor_models/simple_model/simple_model.urdf
 
 xxx
 
