@@ -62,6 +62,55 @@ Egyszerű gyakorlatok:
 
 ![alt text][image5]
 
+## Building editor
+
+![alt text][image7]
+
+![alt text][image8]
+
+![alt text][image9]
+
+![alt text][image10]
+
+![alt text][image11]
+
+![alt text][image12]
+
+gazebo MyWorld.world
+
+
+
+
+
+## Launchfile
+
+```xml
+<?xml version="1.0" encoding="UTF-8"?>
+
+<launch>
+
+  <!-- World File -->
+  <arg name="world_file" default="$(find bme_gazebo_basics)/worlds/world_modified.world"/>
+
+  <!-- Launch Gazebo World -->
+  <include file="$(find gazebo_ros)/launch/empty_world.launch">
+    <arg name="use_sim_time" value="true"/>
+    <arg name="debug" value="false"/>
+    <arg name="gui" value="true" />
+    <arg name="world_name" value="$(arg world_file)"/>
+  </include>
+
+</launch>
+```
+
+roslaunch bme_gazebo_basics world.launch
+
+---
+
+# URDF fájl
+
+## URDF konvertálás
+
 https://github.com/andreasBihlmaier/pysdf
 
 ```console
@@ -78,47 +127,35 @@ optional arguments:
   --no-prefix           Do not use model name as name prefix
 ```
 
-## Building editor
-
-![alt text][image7]
-
-![alt text][image8]
-
-![alt text][image9]
-
-![alt text][image10]
-
-![alt text][image11]
-
-![alt text][image12]
-
-![alt text][image13]
-
-
-gazebo MyWorld.world
-
-## Launchfile
-
----
-
-# RViz
-
-## URDF megnyitása az RVizben
-
 rosrun pysdf sdf2urdf.py /home/david/model_editor_models/simple_model/model.sdf /home/david/model_editor_models/simple_model/simple_model.urdf
 
 xxx
 
 ---
 
+## URDF megnyitása az RViz-ben
 
-# URDF fájl
 
-## Egyszerű URDF készítése
+## Egyszerű URDF / Xacro készítése
 
-## URDF megnyitása az RVizben
 
-## URDF betöltése Gazebo-ba
+## URDF betöltése (spawn) Gazebo-ba és RViz-be
+
+## Plugin
+
+### differenciálhajtás
+
+### Skid steer
+
+# Odometria a ROS-ban
+
+# ROS Graph
+
+# TF és TF tree
+
+# Keyboard teleop
+
+
 
 xxx
 
