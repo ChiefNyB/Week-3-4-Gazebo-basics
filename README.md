@@ -34,6 +34,8 @@ A Gazebo-t a `gazebo` paranccsal tudjuk elindítani. És a következő képerny�
 
 Hivatalos Gazebo tutorialok: [link](http://gazebosim.org/tutorials).
 
+A `gazebo` parancs a `gzserver` és a `gzclient`-et foglalja össze. A `gzserver` a gazebo backendje, ez végzi a fizikai szimulációt, viszont nincs grafikus felülete. A `gzclient` adja a Gazebo grafikus felületét.
+
 ## Gazebo UI
 A Gazebo-t megnyitva a következő képernyőt látjuk:
 ![alt text][image2]
