@@ -137,8 +137,38 @@ xxx
 
 ## URDF megnyitása az RViz-ben
 
+roslaunch urdf_tutorial display.launch model:='$(find bme_gazebo_basics)/urdf/simple_model.urdf'
 
-## Egyszerű URDF / Xacro készítése
+Saját URDF launch fájl:
+
+```xml
+<?xml version="1.0" encoding="UTF-8"?>
+
+<launch>
+
+  <arg name="model" default="$(find bme_gazebo_basics)/urdf/simple_model.urdf"/>
+  <arg name="gui" default="true" />
+  <arg name="rvizconfig" default="$(find bme_gazebo_basics)/rviz/simple_model.rviz" />
+
+  <param name="robot_description" command="$(find xacro)/xacro.py $(arg model)" />
+  <param name="use_gui" value="$(arg gui)"/>
+
+  <node name="joint_state_publisher_gui" pkg="joint_state_publisher_gui" type="joint_state_publisher_gui" />
+  <node name="robot_state_publisher" pkg="robot_state_publisher" type="robot_state_publisher" />
+  <node name="rviz" pkg="rviz" type="rviz" args="-d $(arg rvizconfig)" required="true" />
+
+</launch>
+```
+
+roslaunch bme_gazebo_basics check_urdf.launch
+
+
+
+
+## URDF / Xacro készítése
+
+
+
 
 
 ## URDF betöltése (spawn) Gazebo-ba és RViz-be
