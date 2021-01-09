@@ -92,14 +92,14 @@
     <collision name='collision'>
       <origin xyz="0 0 0" rpy="0 1.5707 1.5707"/> 
       <geometry>
-        <cylinder size=".1 .05"/>
+        <cylinder radius=".1" length=".05"/>
       </geometry>
     </collision>
 
     <visual name='left_wheel_visual'>
       <origin xyz="0 0 0" rpy="0 1.5707 1.5707"/>
       <geometry>
-        <cylinder size=".1 .05"/>
+        <cylinder radius=".1" length=".05"/>
       </geometry>
     </visual>
   </link>
@@ -127,14 +127,14 @@
     <collision name='collision'>
       <origin xyz="0 0 0" rpy="0 1.5707 1.5707"/> 
       <geometry>
-        <cylinder raduis=".1" length=".05"/>
+        <cylinder radius=".1" length=".05"/>
       </geometry>
     </collision>
 
     <visual name='right_wheel_visual'>
       <origin xyz="0 0 0" rpy="0 1.5707 1.5707"/>
       <geometry>
-        <cylinder raduis=".1" length=".05"/>
+        <cylinder radius=".1" length=".05"/>
       </geometry>
     </visual>
   </link>
