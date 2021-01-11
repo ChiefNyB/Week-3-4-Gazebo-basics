@@ -375,25 +375,249 @@ roslaunch bme_gazebo_basics check_urdf.launch model:='$(find bme_gazebo_basics)/
 
 ## URDF betöltése (spawn) Gazebo-ba és RViz-be
 
+```xml
+<?xml version="1.0"?>
 
+<launch>
+
+  <!-- RViz config file -->
+  <arg name="rvizconfig" default="$(find bme_gazebo_basics)/rviz/mogi_world.rviz" />
+
+  <!-- Robot pose -->
+  <!-- Inititalize it's position in the desired location inside the world -->
+  <arg name="x" default="2.5"/>
+  <arg name="y" default="1.5"/>
+  <arg name="z" default="0"/>
+  <arg name="roll" default="0"/>
+  <arg name="pitch" default="0"/>
+  <arg name="yaw" default="0"/>
+
+  <!-- Launch our Gazebo world -->
+  <include file="$(find bme_gazebo_basics)/launch/world.launch"/>
+
+  <!-- Find mogi_bot description and send urdf to param server -->
+  <param name="robot_description" command="$(find xacro)/xacro --inorder '$(find bme_gazebo_basics)/urdf/mogi_bot.xacro'" />
+
+  <!-- Send joint values-->
+  <node name="joint_state_publisher" pkg="joint_state_publisher" type="joint_state_publisher">
+    <param name="use_gui" value="false"/>
+  </node>
+
+  <!-- Send robot states to tf -->
+  <node name="robot_state_publisher" pkg="robot_state_publisher" type="robot_state_publisher" respawn="false" output="screen"/>
+
+  <!-- Spawn mogi_bot -->
+  <node name="urdf_spawner" pkg="gazebo_ros" type="spawn_model" respawn="false" output="screen" 
+        args="-urdf -param robot_description -model mogi_bot 
+              -x $(arg x) -y $(arg y) -z $(arg z)
+              -R $(arg roll) -P $(arg pitch) -Y $(arg yaw)"/>
+
+  <!-- Launch RViz -->
+  <node name="rviz" pkg="rviz" type="rviz" args="-d $(arg rvizconfig)" required="true" />
+
+</launch>
+```
+
+A robot kezdőpozíciója tetszőlegesen szerkeszthető a launchfile-ban, vagy a launchfile indításakor paraméterként:  
+`roslaunch bme_gazebo_basics spawn_robot.launch yaw:=1.57`
 
 ## Plugin
 
+
+
 ### differenciálhajtás
 
-### Skid steer
+Mostmár van egy robotunk, amit be tudunk illeszteni a fizikai szimulációba, vannak kerekei is, azonban egyelőre nem tudjuk vezetni.
+
+http://gazebosim.org/tutorials?tut=ros_gzplugins#DifferentialDrive
+
+Hozzunk létre egy mogi_bot.gazebo fájlt az urdf mappában.
+
+```xml
+<?xml version="1.0"?>
+<robot>
+
+  <gazebo>
+    <plugin name="differential_drive_controller" filename="libgazebo_ros_diff_drive.so">
+      <legacyMode>false</legacyMode>                         <!-- Set to true to swap right and left wheels, defaults to true -->
+      <updateRate>10</updateRate>                            <!-- Plugin update rate in Hz -->
+      <leftJoint>left_wheel_joint</leftJoint>                <!-- Name of left joint, defaults to `left_joint` -->
+      <rightJoint>right_wheel_joint</rightJoint>             <!-- Name of right joint, defaults to `right_joint` -->
+      <wheelSeparation>0.4</wheelSeparation>                 <!-- The distance from the center of one wheel to the other, in meters, defaults to 0.34 m -->
+      <wheelDiameter>0.2</wheelDiameter>                     <!-- Diameter of the wheels, in meters, defaults to 0.15 m -->
+      <wheelTorque>10</wheelTorque>                          <!-- Maximum torque which the wheels can produce, in Nm, defaults to 5 Nm -->
+      <wheelAcceleration>1.0</wheelAcceleration>             <!-- Wheel acceleration, in rad/s^2, defaults to 0.0 rad/s^2 -->
+      <commandTopic>cmd_vel</commandTopic>                   <!-- Topic to receive geometry_msgs/Twist message commands, defaults to `cmd_vel` -->
+      <odometryTopic>odom</odometryTopic>                    <!-- Topic to publish nav_msgs/Odometry messages, defaults to `odom` -->
+      <odometryFrame>odom</odometryFrame>                    <!-- Odometry frame, defaults to `odom` -->
+      <robotBaseFrame>base_footprint</robotBaseFrame>        <!-- Robot frame to calculate odometry from, defaults to `base_footprint` -->
+      <odometrySource>world</odometrySource>                 <!-- Odometry source, 0 for ENCODER, 1 for WORLD, defaults to WORLD -->
+      <publishWheelTF>false</publishWheelTF>                 <!-- Set to true to publish transforms for the wheel links, defaults to false -->
+      <publishOdomTF>true</publishOdomTF>                    <!-- Set to true to publish transforms for the odometry, defaults to true -->
+      <publishWheelJointState>false</publishWheelJointState> <!-- Set to true to publish sensor_msgs/JointState on /joint_states for the wheel joints, defaults to false -->
+      <publishTf>1</publishTf>                               <!-- Set to 1 (true) to publish transforms from Gazebo, defaults to 1 -->
+      <rosDebugLevel>na</rosDebugLevel>                      <!-- ROS Debug level, defaults to na -->
+    </plugin>
+  </gazebo>
+
+</robot>
+```
+
+Majd adjuk hozzá ezt a fájlt a xacro fájlunkhoz:
+
+`<xacro:include filename="$(find bme_gazebo_basics)/urdf/mogi_bot.gazebo" />`
+
+Még a `<link name="base_footprint"></link>` előtt!
+
+## cmd_vel
+
+A plugin beállításakor beállítottuk, hogy a szimulált robotunkat a cmd_vel topicon érkező Twist üzenettel lehet vezetni. 
+
+```xml
+<commandTopic>cmd_vel</commandTopic>                   <!-- Topic to receive geometry_msgs/Twist message commands, defaults to `cmd_vel` -->
+```
+
+Innentől kezdve a robotunk egy Twist üzenetet vár és az irányítása gyakorlatilag megegyezik a Turtlesim vezetésével!
+
+Akkor tehát használhatjuk a `rosrun turtlesim turtle_teleop_key`-t a robot irányítására? 
+
+Próbáljuk ki!
+
+A robot nem mozdul meg, ennek az az oka, hogy ugyan Twist üzenetet küld a távirányító és Twist üzenetet vár a robot is, azonban nem ugyanazon a topicon próbálnak kommunikálni!
+Az előzőekben használt eszközökkel is meg tudjuk ezt vizsgálni:
+
+rosnode list
+rosnode info /turtle_teleop_key
+
+```console
+Node [/turtle_teleop_key]
+Publications: 
+ * /rosout [rosgraph_msgs/Log]
+ * /turtle1/cmd_vel [geometry_msgs/Twist]
+ 
+Subscriptions: 
+ * /clock [rosgraph_msgs/Clock]
+```
+
+rosnode info /gazebo
+
+```console
+Node [/gazebo]
+Publications: 
+ * /clock [rosgraph_msgs/Clock]
+ * /gazebo/link_states [gazebo_msgs/LinkStates]
+ * /gazebo/model_states [gazebo_msgs/ModelStates]
+ * /gazebo/parameter_descriptions [dynamic_reconfigure/ConfigDescription]
+ * /gazebo/parameter_updates [dynamic_reconfigure/Config]
+ * /odom [nav_msgs/Odometry]
+ * /rosout [rosgraph_msgs/Log]
+ * /tf [tf2_msgs/TFMessage]
+
+Subscriptions: 
+ * /clock [rosgraph_msgs/Clock]
+ * /cmd_vel [unknown type]
+ * /gazebo/set_link_state [unknown type]
+ * /gazebo/set_model_state [unknown type]
+```
+
+Vagy a rostopic segítségével
+
+rostopic list
+
+rostopic info /turtle1/cmd_vel
+
+```console
+Type: geometry_msgs/Twist
+
+Publishers: 
+ * /turtle_teleop_key (http://172.17.19.175:39745/)
+
+Subscribers: None
+```
+
+rostopic info /cmd_vel
+
+```console
+Type: geometry_msgs/Twist
+
+Publishers: None
+
+Subscribers: 
+ * /gazebo (http://172.17.19.175:40875/)
+```
+
+Egy másik nagyon hasznos eszköz az rqt_graph:
+
+rqt_graph
+
+Tehát használhatjuk ezt az irányításra, viszont alapértelmezetten a `turtle_teleop_key` más topicba (`/turtle1/cmd_vel`) küldi az üzeneteket. Módosíthatnánk a Gazebo plugint, hogy a megfelelő topicon várja a Twist üzenetet, azonban az a konvenció a ROS-ban, hogy a robotunkat a cmd_vel topicon érkező Twist üzenettel mozgatjuk.
+
+Megoldás: csomagoljuk be egy launchfile-ba a turtle_teleop_key-t, és irányítsuk át a cmd_vel topicra!
+
+```xml
+<?xml version="1.0" encoding="UTF-8"?>
+
+<launch>
+
+  <node name="turtle_teleop_key" pkg="turtlesim" type="turtle_teleop_key" output="screen">
+    <remap from="/turtle1/cmd_vel" to="cmd_vel"/>
+  </node>
+
+</launch>
+```
+
+rqt_graph
+
+Azért ez még mindig nem az igazi, mert nem tudunk megállni. De van erre egy [megfelelő ROS csomag](http://wiki.ros.org/key_teleop)!  
+Azonban ez sem a cmd_vel topicra küldi a Twist üzeneteket alapból, hanem a key_vel-re, így tegyük be ezt a launchfile-ba, és mappeljük át a topicot!
+
+```xml
+<?xml version="1.0" encoding="UTF-8"?>
+
+<launch>
+
+  <node name="key_teleop" pkg="key_teleop" type="key_teleop.py" output="screen">
+    <remap from="key_vel" to="cmd_vel"/>
+  </node>
+
+</launch>
+```
+
+Vagy egy másik lehetőség egy [összetettebb parancssoros irányító node](http://wiki.ros.org/teleop_twist_keyboard)!  
+A teleop_twist_keyboard alapból a cmd_vel topicra küldi a Twist üzenetét, így ezt nem kell átirányítanunk!
+
+```xml
+<?xml version="1.0" encoding="UTF-8"?>
+
+<launch>
+
+  <node name="teleop_twist_keyboard" pkg="teleop_twist_keyboard" type="teleop_twist_keyboard.py" output="screen"/>
+
+</launch>
+```
+
 
 # Odometria a ROS-ban
 
-# ROS Graph
+rosrun rqt_tf_tree rqt_tf_tree
 
-# TF és TF tree
+Adjuk hozzá a spawn_robot.launch fájlunkhoz a trajektória mentését:
 
-# Keyboard teleop
+```xml
+  <!-- Launch trajectory server -->
+  <node pkg="hector_trajectory_server" type="hector_trajectory_server" respawn="false" name="hector_trajectory_server" output="screen">
+    <param name="source_frame_name" value="base_footprint"/>
+    <param name="target_frame_name" value="odom"/>
+  </node>
+```
+
+nézzük meg most a node-jainkat az rqt_graph segítségével!
 
 
+### Skid steer (opcionális)
+cseréljük le a 2 gömbkereket még két kerékre, és csináljunk egy 4 kerekű skid steer robotot.
 
-xxx
+http://gazebosim.org/tutorials?tut=ros_gzplugins#SkidSteeringDrive
 
 ---
 
