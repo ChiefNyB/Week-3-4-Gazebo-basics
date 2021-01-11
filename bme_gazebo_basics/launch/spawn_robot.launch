@@ -2,10 +2,13 @@
 
 <launch>
 
+  <!-- RViz config file -->
+  <arg name="rvizconfig" default="$(find bme_gazebo_basics)/rviz/mogi_bot.rviz" />
+
   <!-- Robot pose -->
   <!-- Inititalize it's position in the desired location inside the world -->
-  <arg name="x" default="0"/>
-  <arg name="y" default="0"/>
+  <arg name="x" default="2.5"/>
+  <arg name="y" default="1.5"/>
   <arg name="z" default="0"/>
   <arg name="roll" default="0"/>
   <arg name="pitch" default="0"/>
@@ -30,6 +33,8 @@
         args="-urdf -param robot_description -model mogi_bot 
               -x $(arg x) -y $(arg y) -z $(arg z)
               -R $(arg roll) -P $(arg pitch) -Y $(arg yaw)"/>
+
+    <node name="rviz" pkg="rviz" type="rviz" args="-d $(arg rvizconfig)" required="true" />
 
 
 </launch>
