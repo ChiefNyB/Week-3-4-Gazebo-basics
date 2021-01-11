@@ -60,31 +60,59 @@ Egyszerű gyakorlatok:
 
 ## Model editor
 
+Először hozzunk létre egy ROS csomagot a leckének:  
+`catkin_create_pkg bme_gazebo_basics roscpp rospy std_msgs actionlib actionlib_msgs`
+
+Ide fogjuk menteni a létrehozott fájlokat.
+
 ![alt text][image6]
 
 ![alt text][image5]
 
+Mentsük el a ~/catkin_ws/src/bme_gazebo_basics/urdf alá simple model néven.
+
 ## Building editor
 
+Nyissuk meg a building editort.
+
+Adjuk hozzá a foorplant a ~/catkin_ws/src/bme_gazebo_basics/worlds/floorplan.png fájlból az import gomb segítségével.
+
+
+
+
 ![alt text][image7]
+Állítsuk be a fal hosszakat a next gomb megnyomása után.
 
 ![alt text][image8]
 
+Húzzuk be a falakat a floorplan alapján. Érdemes figyelni arra, hogy "záródjanak" a fal kontúrjai.
+
 ![alt text][image9]
+
+Ajtókat és ablakokat hozzá tudunk adni a window és door toolokkal, viszont praktikus szempontból az ajtókat nem ajánlom, mert ha térképet akartok generálni az épületről, akkor az ajtókat és ablakokat falként fogja kezelni.
 
 ![alt text][image10]
 
+Elmenthetjük az épületet sdf fájlként, és visszatérhetünk a Gazebohoz. Fontos, hogy mentés után többet az épület nem szerkeszthető!
+
 ![alt text][image11]
+
+Opcionális: tehetünk bele pár objektumot a gazebo model libraryből:
 
 ![alt text][image12]
 
-gazebo MyWorld.world
+Mentsük el a gazebo világot world_modified.world néven, ezt fogjuk betölteni Gazebo-ba a szimuláció során.
+
+Ki is tudjuk próbálni:  
+gazebo world_modified.world
 
 
 
 
 
 ## Launchfile
+
+Készítsünk egy launchfile-t, ami megnyitja a Gazebot és betölti az elmentett világunkat.
 
 ```xml
 <?xml version="1.0" encoding="UTF-8"?>
@@ -113,7 +141,17 @@ roslaunch bme_gazebo_basics world.launch
 
 ## URDF konvertálás
 
-https://github.com/andreasBihlmaier/pysdf
+Az előbb elmentett simple_model sdf formátumban van, ami a Gazebonak megfelel, azonban a ROS-nak nem. A ROS-nak URDF fájlra van szüksége.
+Megpróbálhatjuk átkonvertálni az sdf fájlokat, de csak a baj lesz vele. Érdemes a robotokat urdf/xacro fájlként modellezni, ezeket a ROS és a Gazebo is tudja kezelni. A háttérben a Gazebo egyébként sdf-fé konvertálja az URDF-jeinket, de ezzel nem kell foglalkoznunk.
+
+Itt egy konvertáló tool, ha mégis meg szeretnénk próbálni:
+
+
+https://github.com/MOGI-ROS/pysdf
+
+git clone a catkin_ws/src-be
+catkin make
+source devel/setup.bash
 
 ```console
 david@DavidsLenovoX1:~/bme_catkin_ws$ rosrun pysdf sdf2urdf.py -h
@@ -129,7 +167,21 @@ optional arguments:
   --no-prefix           Do not use model name as name prefix
 ```
 
-rosrun pysdf sdf2urdf.py /home/david/model_editor_models/simple_model/model.sdf /home/david/model_editor_models/simple_model/simple_model.urdf
+rosrun pysdf sdf2urdf.py /home/david/bme_catkin_ws/src/Week-3-Gazebo-basics/bme_gazebo_basics/urdf/simple_model/model.sdf /home/david/bme_catkin_ws/src/Week-3-Gazebo-basics/bme_gazebo_basics/urdf/simple_model.urdf
+
+```xml
+<?xml version="1.0" ?>
+<robot name="simple_model">
+  <joint name="simple_model__link_1_JOINT_0" type="revolute">
+...
+```
+
+```xml
+<?xml version="1.0" ?>
+<robot name="simple_model">
+  <joint name="simple_model__link_1_JOINT_0" type="continuous">
+...
+```
 
 xxx
 
@@ -160,18 +212,170 @@ Saját URDF launch fájl:
 </launch>
 ```
 
+Launch file elemzése!
+
 roslaunch bme_gazebo_basics check_urdf.launch
-
-
 
 
 ## URDF / Xacro készítése
 
 
 
+```xml
+<?xml version='1.0'?>
+
+<robot name="mogi_bot" xmlns:xacro="http://www.ros.org/wiki/xacro">
+
+  <link name="base_footprint"></link>
+
+  <joint name="base_footprint_joint" type="fixed">
+    <origin xyz="0 0 0" rpy="0 0 0" />
+    <parent link="base_footprint"/>
+    <child link="base_link" />
+  </joint>
+
+  <link name='base_link'>
+    <pose>0 0 0.1 0 0 0</pose>
+
+    <inertial>
+      <mass value="15.0"/>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <inertia
+          ixx="0.1" ixy="0" ixz="0"
+          iyy="0.1" iyz="0"
+          izz="0.1"
+      />
+    </inertial>
+
+    <collision name='collision'>
+      <origin xyz="0 0 0" rpy="0 0 0"/> 
+      <geometry>
+        <box size=".4 .2 .1"/>
+      </geometry>
+    </collision>
+
+    <visual name='base_link_visual'>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <geometry>
+        <box size=".4 .2 .1"/>
+      </geometry>
+    </visual>
+
+    <collision name='rear_caster_collision'>
+      <origin xyz="-0.15 0 -0.05" rpy="0 0 0"/>
+      <geometry>
+        <sphere radius="0.0499"/>
+      </geometry>
+    </collision>
+
+    <visual name='rear_caster_visual'>
+      <origin xyz="-0.15 0 -0.05" rpy="0 0 0"/>
+      <geometry>
+        <sphere radius="0.05"/>
+      </geometry>
+    </visual>
+
+    <collision name='front_caster_collision'>
+      <origin xyz="0.15 0 -0.05" rpy="0 0 0"/>
+      <geometry>
+        <sphere radius="0.0499"/>
+      </geometry>
+    </collision>
+
+    <visual name='front_caster_visual'>
+      <origin xyz="0.15 0 -0.05" rpy="0 0 0"/>
+      <geometry>
+        <sphere radius="0.05"/>
+      </geometry>
+    </visual>
+
+  </link>
+
+</robot>
+```
+
+roslaunch bme_gazebo_basics check_urdf.launch model:='$(find bme_gazebo_basics)/urdf/mogi_bot.xacro' rvizconfig:='$(find bme_gazebo_basics)/rviz/mogi_bot.rviz'
+
+Adjunk hozzá 2 kereket is a `</robot>` tag elé:
+
+```xml
+  <joint type="continuous" name="left_wheel_joint">
+    <origin xyz="0 0.15 0" rpy="0 0 0"/>
+    <child link="left_wheel"/>
+    <parent link="base_link"/>
+    <axis xyz="0 1 0" rpy="0 0 0"/>
+    <limit effort="10000" velocity="1000"/>
+    <dynamics damping="1.0" friction="1.0"/>
+  </joint>
+
+  <link name='left_wheel'>
+    <inertial>
+      <mass value="5.0"/>
+      <origin xyz="0 0 0" rpy="0 1.5707 1.5707"/>
+      <inertia
+          ixx="0.1" ixy="0" ixz="0"
+          iyy="0.1" iyz="0"
+          izz="0.1"
+      />
+    </inertial>
+
+    <collision name='collision'>
+      <origin xyz="0 0 0" rpy="0 1.5707 1.5707"/> 
+      <geometry>
+        <cylinder radius=".1" length=".05"/>
+      </geometry>
+    </collision>
+
+    <visual name='left_wheel_visual'>
+      <origin xyz="0 0 0" rpy="0 1.5707 1.5707"/>
+      <geometry>
+        <cylinder radius=".1" length=".05"/>
+      </geometry>
+    </visual>
+  </link>
+
+  <joint type="continuous" name="right_wheel_joint">
+    <origin xyz="0 -0.15 0" rpy="0 0 0"/>
+    <child link="right_wheel"/>
+    <parent link="base_link"/>
+    <axis xyz="0 1 0" rpy="0 0 0"/>
+    <limit effort="10000" velocity="1000"/>
+    <dynamics damping="1.0" friction="1.0"/>
+  </joint>
+
+  <link name='right_wheel'>
+    <inertial>
+      <mass value="5.0"/>
+      <origin xyz="0 0 0" rpy="0 1.5707 1.5707"/>
+      <inertia
+          ixx="0.1" ixy="0" ixz="0"
+          iyy="0.1" iyz="0"
+          izz="0.1"
+      />
+    </inertial>
+
+    <collision name='collision'>
+      <origin xyz="0 0 0" rpy="0 1.5707 1.5707"/> 
+      <geometry>
+        <cylinder radius=".1" length=".05"/>
+      </geometry>
+    </collision>
+
+    <visual name='right_wheel_visual'>
+      <origin xyz="0 0 0" rpy="0 1.5707 1.5707"/>
+      <geometry>
+        <cylinder radius=".1" length=".05"/>
+      </geometry>
+    </visual>
+  </link>
+```
+
+roslaunch bme_gazebo_basics check_urdf.launch model:='$(find bme_gazebo_basics)/urdf/mogi_bot.xacro' rvizconfig:='$(find bme_gazebo_basics)/rviz/mogi_bot.rviz'
 
 
 ## URDF betöltése (spawn) Gazebo-ba és RViz-be
+
+
 
 ## Plugin
 
