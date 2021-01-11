@@ -2,6 +2,9 @@
 
 <robot name="mogi_bot" xmlns:xacro="http://www.ros.org/wiki/xacro">
 
+  <!-- STEP 3 -->
+  <xacro:include filename="$(find bme_gazebo_basics)/urdf/mogi_bot.gazebo" />
+
   <!-- STEP 1 -->
   <link name="base_footprint"></link>
 
