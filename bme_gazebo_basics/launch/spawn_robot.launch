@@ -3,7 +3,7 @@
 <launch>
 
   <!-- RViz config file -->
-  <arg name="rvizconfig" default="$(find bme_gazebo_basics)/rviz/mogi_bot.rviz" />
+  <arg name="rvizconfig" default="$(find bme_gazebo_basics)/rviz/mogi_world.rviz" />
 
   <!-- Robot pose -->
   <!-- Inititalize it's position in the desired location inside the world -->
@@ -28,13 +28,14 @@
   <!-- Send robot states to tf -->
   <node name="robot_state_publisher" pkg="robot_state_publisher" type="robot_state_publisher" respawn="false" output="screen"/>
 
-  <!-- Spawn bogi_bot -->
+  <!-- Spawn mogi_bot -->
   <node name="urdf_spawner" pkg="gazebo_ros" type="spawn_model" respawn="false" output="screen" 
         args="-urdf -param robot_description -model mogi_bot 
               -x $(arg x) -y $(arg y) -z $(arg z)
               -R $(arg roll) -P $(arg pitch) -Y $(arg yaw)"/>
 
-    <node name="rviz" pkg="rviz" type="rviz" args="-d $(arg rvizconfig)" required="true" />
+  <!-- Launch RViz -->
+  <node name="rviz" pkg="rviz" type="rviz" args="-d $(arg rvizconfig)" required="true" />
 
 
 </launch>
