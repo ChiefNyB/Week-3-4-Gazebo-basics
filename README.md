@@ -11,40 +11,71 @@
 [image9]: ./assets/gazebo_9.png "Gazebo" 
 [image10]: ./assets/gazebo_10.png "Gazebo" 
 [image11]: ./assets/gazebo_11.png "Gazebo" 
-[image12]: ./assets/gazebo_12.png "Gazebo" 
-[image13]: ./assets/gazebo_13.png "Gazebo" 
-[image14]: ./assets/gazebo_14.png "Gazebo" 
+[image12]: ./assets/gazebo_12.png "Gazebo"
+[image13]: ./assets/mogi_bot_1.png "MOGI bot" 
+[image14]: ./assets/mogi_bot_2.png "MOGI bot" 
+[image15]: ./assets/mogi_bot_3.png "MOGI bot" 
+[image16]: ./assets/mogi_bot_4.png "MOGI bot" 
+[image17]: ./assets/mogi_bot_5.png "MOGI bot" 
+[image18]: ./assets/mogi_bot_6.png "MOGI bot"
+[image19]: ./assets/simple_model.png "Simple model"
+[image20]: ./assets/odom_1.png "Odometry" 
+[image21]: ./assets/odom_2.png "Odometry" 
+[image22]: ./assets/odom_3.png "Odometry" 
 
+# 3. - 4. hét - Gazebo és URDF
 
-# 3. hét - Gazebo és URDF
+## Hova fogunk eljutni?
 
+ToDo: VIDEO
 
 # Gazebo
 
-A Gazebo egy önálló fizikai szimulációs környezet, nem a ROS része, azonban rengeteg csomag segíti az integrációját a ROS-hoz. Jelenleg a 11-es verziónál tart. Melyik verziót használjuk?
+A Gazebo egy önálló fizikai szimulációs környezet, nem a ROS része, azonban rengeteg csomag segíti az integrációját a ROS-hoz. Jelenleg a 11-es verziónál tart. Melyik verziót használjuk? Mivel az ajánlott konfiguráció Ubuntu 18.04 + ROS Melodic, így a Gazebo 9.0-val dolgozunk, de kisebb módosításokkal minden működhet Ubuntu 20.04 + ROS Noetic és Gazebo 11-gyel is.
 
-| ROS     | Gazebo |
-|---------|--------|
-| Melodic | 9.0    |
-| Noetic  | 11.1   |
+| Ubuntu | ROS     | Gazebo |
+|--------|---------|--------|
+| 18.04  | Melodic | 9.0    |
+| 20.04  | Noetic  | 11.1   |
 
-Ha nincs még telepítve akkor a `sudo apt install gazebo9` vagy `gazebo11` paranccsal tudjuk telepíteni.  
+Ha a `ros-melodic-desktop-full` csomagot telepítettétek, akkor a Gazebo már telepítve van.
+
+Ha valamiért mégsincs telepítve akkor a `sudo apt install gazebo9` vagy `gazebo11` paranccsal tudjátok telepíteni.  
 A Gazebo-t a `gazebo` paranccsal tudjuk elindítani. És a következő képernyővel indul:  
 ![alt text][image1]
 
-Hivatalos Gazebo tutorialok: [link](http://gazebosim.org/tutorials).
+Virtuális gép esetén, ha a következő hibát dobja a Gazebo és nem indul el:
+```console
+ros-user@ros-virtual-machine:~$ gazebo
+VMware: vmw_ioctl_command error Invalid argument.
+```
+
+Akkor be kell állítani az `export SVGA_VGPU10=0` környezeti változót. Érdemes betenni a `./bashrc` fájlba ebben az esetben.
+
+Gazebo 9 esetén még egy teendőnk van, a `~/.ignition/fuel/config.yaml` fájl szerkesztése, ha a Gazebo indulásakor a következő hibát látjátok:
+```console
+ros-user@ros-virtual-machine:~$ gazebo
+[Err] [REST.cc:205] Error in REST request
+
+libcurl: (51) SSL: no alternative certificate subject name matches target host name 'api.ignitionfuel.org'
+```
+Ebben az esetben a fenti fájlban a `url: https://api.ignitionfuel.org` sort a `url: https://api.ignitionrobotics.org`-re kell cserélni.
+
 
 A `gazebo` parancs a `gzserver` és a `gzclient`-et foglalja össze. A `gzserver` a gazebo backendje, ez végzi a fizikai szimulációt, viszont nincs grafikus felülete. A `gzclient` adja a Gazebo grafikus felületét.
 
+További hivatalos Gazebo tutorialok: [link](http://gazebosim.org/tutorials).
+
 ## Gazebo UI
-A Gazebo-t megnyitva a következő képernyőt látjuk:
+A Gazebo-t megnyitva a következő képernyőt látjuk:  
+
 ![alt text][image2]
 
 Részletes angol tutorial a UI-ról: [link](http://gazebosim.org/tutorials?cat=guided_b&tut=guided_b2)
 
-A bal oldali panel (zöld) mutatja a szimulációban lévő objektumok hierarchiáját.
-Fent (piros) az eszköztár, mozgatás, forgatás, kamera beállítások, stb.
-Alul (barna) a szimuláció megállítása, elindítása, real-time faktor és időbélyegek.
+A bal oldali panel (zöld) mutatja a szimulációban lévő objektumok hierarchiáját.  
+Fent (piros) az eszköztár, mozgatás, forgatás, kamera beállítások, stb.  
+Alul (barna) a szimuláció megállítása, elindítása, real-time faktor és időbélyegek.  
 Középen (kék) a szimuláció 3D-s világa.
 
 ## Egyszerű modellek, modell library
@@ -58,30 +89,40 @@ Egyszerű gyakorlatok:
 ![alt text][image3]
 ![alt text][image4]
 
+A modell library-t az insert fül alatt találjuk:
+
+
 ## Model editor
 
-Először hozzunk létre egy ROS csomagot a leckének:  
+Először is hozzunk létre egy ROS csomagot a leckének:  
 `catkin_create_pkg bme_gazebo_basics roscpp rospy std_msgs actionlib actionlib_msgs`
 
-Ide fogjuk menteni a létrehozott fájlokat.
+Vagy töltsük le GitHub-ról a `git clone` paranccsal.
+
+A model editort az edit menüben találjátok.
 
 ![alt text][image6]
 
+Adjunk hozzá egy hengert majd egy kockát. A hengert méretezzük át és forgassuk el az ábra alapján:
+
 ![alt text][image5]
 
-Mentsük el a ~/catkin_ws/src/bme_gazebo_basics/urdf alá simple model néven.
+Állítsunk be egy jointot
+
+Mentsük el a ~/catkin_ws/src/bme_gazebo_basics/urdf alá simple model néven. Valójában egy mappát fogunk elmenteni, amiben lesz egy model.sdf és gy model.config fájl. Nemsokára megnézzük mit tudunk csinálni ezzel a modellel!
 
 ## Building editor
 
-Nyissuk meg a building editort.
+Nyissuk meg a building editort az edit menüből.
 
-Adjuk hozzá a foorplant a ~/catkin_ws/src/bme_gazebo_basics/worlds/floorplan.png fájlból az import gomb segítségével.
+Adjuk hozzá a foorplant a floorplan.png fájlt az import gomb segítségével.  
 
-
+Ha a GitHubról töltöttétek le a kezdőcsomagot, akkor ez a worlds mappában van, ha teljesen új csomagot csináltatok, akkor így tudjátok letölteni `wget`-tel:  
+`wget https://raw.githubusercontent.com/MOGI-ROS/Week-3-Gazebo-basics/main/bme_gazebo_basics/worlds/floorplan.png`
 
 
 ![alt text][image7]
-Állítsuk be a fal hosszakat a next gomb megnyomása után.
+Állítsuk be valamelyik fal hosszát referenciaként a next gomb megnyomása után.
 
 ![alt text][image8]
 
@@ -89,7 +130,7 @@ Húzzuk be a falakat a floorplan alapján. Érdemes figyelni arra, hogy "záród
 
 ![alt text][image9]
 
-Ajtókat és ablakokat hozzá tudunk adni a window és door toolokkal, viszont praktikus szempontból az ajtókat nem ajánlom, mert ha térképet akartok generálni az épületről, akkor az ajtókat és ablakokat falként fogja kezelni.
+Ajtókat és ablakokat hozzá tudunk adni a window és door toolokkal, viszont az ajtókat nem praktikus, mert ha térképet generálunk majd az épületről, akkor az ajtókat és ablakokat falként fogja kezelni.
 
 ![alt text][image10]
 
@@ -601,7 +642,7 @@ A teleop_twist_keyboard alapból a cmd_vel topicra küldi a Twist üzenetét, í
 
 rosrun rqt_tf_tree rqt_tf_tree
 
-Adjuk hozzá a spawn_robot.launch fájlunkhoz a trajektória mentését:
+Adjuk hozzá a spawn_robot.launch fájlunkhoz a trajektória mentését, ehhez a [Hector trajectory server](https://wiki.ros.org/hector_trajectory_server)t fogjuk használni.
 
 ```xml
   <!-- Launch trajectory server -->
