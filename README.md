@@ -22,6 +22,9 @@
 [image20]: ./assets/odom_1.png "Odometry" 
 [image21]: ./assets/odom_2.png "Odometry" 
 [image22]: ./assets/odom_3.png "Odometry" 
+[image23]: ./assets/gazebo_13.png "Gazebo" 
+[image24]: ./assets/gazebo_14.png "Gazebo"
+[image25]: ./assets/simple_model_2.png "Simple model"
 
 # 3. - 4. hét - Gazebo és URDF
 
@@ -90,7 +93,10 @@ Egyszerű gyakorlatok:
 ![alt text][image4]
 
 A modell library-t az insert fül alatt találjuk:
+![alt text][image23]
 
+Egy kis ideig eltart, mire a Gazebo beolvassa a modelleket a szerverről, utána megjelenik a lista:
+![alt text][image24]
 
 ## Model editor
 
@@ -109,15 +115,15 @@ Adjunk hozzá egy hengert majd egy kockát. A hengert méretezzük át és forga
 
 Állítsunk be egy jointot
 
-Mentsük el a ~/catkin_ws/src/bme_gazebo_basics/urdf alá simple model néven. Valójában egy mappát fogunk elmenteni, amiben lesz egy model.sdf és gy model.config fájl. Nemsokára megnézzük mit tudunk csinálni ezzel a modellel!
+Mentsük el a `~/catkin_ws/src/bme_gazebo_basics/urdf` alá simple model néven. Valójában egy mappát fogunk elmenteni, amiben lesz egy `model.sdf` és egy `model.config` fájl. Nemsokára megnézzük mit tudunk csinálni ezzel a modellel!
 
 ## Building editor
 
 Nyissuk meg a building editort az edit menüből.
 
-Adjuk hozzá a foorplant a floorplan.png fájlt az import gomb segítségével.  
+Adjuk hozzá a foorplant a `floorplan.png` fájlt az import gomb segítségével.  
 
-Ha a GitHubról töltöttétek le a kezdőcsomagot, akkor ez a worlds mappában van, ha teljesen új csomagot csináltatok, akkor így tudjátok letölteni `wget`-tel:  
+Ha a GitHubról töltöttétek le a kezdőcsomagot, akkor ez a `worlds` mappában van, ha teljesen új csomagot csináltatok, akkor így tudjátok letölteni `wget`-tel:  
 `wget https://raw.githubusercontent.com/MOGI-ROS/Week-3-Gazebo-basics/main/bme_gazebo_basics/worlds/floorplan.png`
 
 
@@ -144,16 +150,19 @@ Opcionális: tehetünk bele pár objektumot a gazebo model libraryből:
 
 Mentsük el a gazebo világot world_modified.world néven, ezt fogjuk betölteni Gazebo-ba a szimuláció során.
 
-Ki is tudjuk próbálni:  
-gazebo world_modified.world
-
-
+Ki is tudjuk próbálni az elmentett világ betöltését Gazeboba:  
+`gazebo world_modified.world`
 
 
 
 ## Launchfile
 
-Készítsünk egy launchfile-t, ami megnyitja a Gazebot és betölti az elmentett világunkat.
+Készítsünk egy launchfile-t `world.launch` néven, ami megnyitja a Gazebot és betölti az elmentett világunkat.
+
+Emlékeztetőül:  
+`roscd bme_gazebo_basics`  
+`cd launch`  
+`touch world.launch`
 
 ```xml
 <?xml version="1.0" encoding="UTF-8"?>
@@ -174,7 +183,12 @@ Készítsünk egy launchfile-t, ami megnyitja a Gazebot és betölti az elmentet
 </launch>
 ```
 
-roslaunch bme_gazebo_basics world.launch
+A már megszokott módon fordítsuk újra a catkin workspace-t a workspace gyökerében, és töltsük be a környezetet:  
+`catkin_make`  
+`source devel/setup.bash`  
+
+Ezek után el is tudjuk indítani a frissen létrehozott launchfile-unkat, ami megnyitja a Gazebo-t és betölti a világot:  
+`roslaunch bme_gazebo_basics world.launch`
 
 ---
 
@@ -182,20 +196,22 @@ roslaunch bme_gazebo_basics world.launch
 
 ## URDF konvertálás
 
-Az előbb elmentett simple_model sdf formátumban van, ami a Gazebonak megfelel, azonban a ROS-nak nem. A ROS-nak URDF fájlra van szüksége.
-Megpróbálhatjuk átkonvertálni az sdf fájlokat, de csak a baj lesz vele. Érdemes a robotokat urdf/xacro fájlként modellezni, ezeket a ROS és a Gazebo is tudja kezelni. A háttérben a Gazebo egyébként sdf-fé konvertálja az URDF-jeinket, de ezzel nem kell foglalkoznunk.
+Az előbb elmentett simple_model sdf formátumban van, ami a Gazebonak ugyan megfelel, azonban a ROS-nak nem. A ROS-nak URDF fájlra van szüksége.
+Megpróbálhatjuk átkonvertálni az sdf fájlokat, de csak a baj lesz vele, tényleg. Érdemes a robotokat urdf/xacro fájlként modellezni, ezeket a ROS és a Gazebo is tudja kezelni. A háttérben a Gazebo egyébként sdf-fé konvertálja az URDF-jeinket, de ezzel nem kell foglalkoznunk.
 
 Itt egy konvertáló tool, ha mégis meg szeretnénk próbálni:
 
-
 https://github.com/MOGI-ROS/pysdf
 
-git clone a catkin_ws/src-be
-catkin make
-source devel/setup.bash
+A `git clone` paranccsal tudjátok letölteni a `catkin_ws/src` mappába:  
+`git clone https://github.com/MOGI-ROS/pysdf`  
+`catkin make`  
+`source devel/setup.bash`
+
+A `pysdf`-et ROS csomagként indíthatjuk, és a `-h` segít a paraméterekkel.
 
 ```console
-david@DavidsLenovoX1:~/bme_catkin_ws$ rosrun pysdf sdf2urdf.py -h
+david@DavidsLenovoX1:~/catkin_ws$ rosrun pysdf sdf2urdf.py -h
 usage: sdf2urdf.py [-h] [-p PLOT] [--no-prefix] sdf urdf
 
 positional arguments:
@@ -208,8 +224,11 @@ optional arguments:
   --no-prefix           Do not use model name as name prefix
 ```
 
-rosrun pysdf sdf2urdf.py /home/david/bme_catkin_ws/src/Week-3-Gazebo-basics/bme_gazebo_basics/urdf/simple_model/model.sdf /home/david/bme_catkin_ws/src/Week-3-Gazebo-basics/bme_gazebo_basics/urdf/simple_model.urdf
+`rosrun pysdf sdf2urdf.py ~/catkin_ws/src/Week-3-4-Gazebo-basics/bme_gazebo_basics/urdf/simple_model/model.sdf ~/catkin_ws/src/Week-3-4-Gazebo-basics/bme_gazebo_basics/urdf/simple_model.urdf`
 
+A konverzió után van még egy kis javítani valónk a jointtal, ezért nem érdemes SDF fájlba mentenünk a robotjainkat.
+
+A `revolute` típusú jointunkat `continuous`-re kell cseréljük:
 ```xml
 <?xml version="1.0" ?>
 <robot name="simple_model">
@@ -224,15 +243,17 @@ rosrun pysdf sdf2urdf.py /home/david/bme_catkin_ws/src/Week-3-Gazebo-basics/bme_
 ...
 ```
 
-xxx
+Ezek után meg tudjuk nyitni az átkonvertált modellünket!
 
 ---
 
 ## URDF megnyitása az RViz-ben
 
-roslaunch urdf_tutorial display.launch model:='$(find bme_gazebo_basics)/urdf/simple_model.urdf'
+Az alap ROS telepítésben van egy `urdf_tutorial`, ezt felhasználhatjuk a modellünk megjelenítésére:
 
-Saját URDF launch fájl:
+`roslaunch urdf_tutorial display.launch model:='$(find bme_gazebo_basics)/urdf/simple_model.urdf'`
+
+Sajnos nem tudjuk módosítani az RViz beállításait, mivel egy read-only csomagot használtunk a megjelenítéshez, ezért készítsünk egy saját launch fájlt az URDF-ünk megnyitására `check_urdf.launch` néven:
 
 ```xml
 <?xml version="1.0" encoding="UTF-8"?>
@@ -253,14 +274,53 @@ Saját URDF launch fájl:
 </launch>
 ```
 
-Launch file elemzése!
+Ebben a launch fájlban több csomagot, argumentumokat és paramétereket is használunk!  
 
-roslaunch bme_gazebo_basics check_urdf.launch
+- [Joint state publisher](http://wiki.ros.org/joint_state_publisher), a joint state publisher az URDF modellünk minden, nem fix jointjának adatait publsholja egy Joint State típusú üzenetben.
+- [Robot state publisher](http://wiki.ros.org/robot_state_publisher), a robot state publisher az URDF modell és a joint state publisher által küldött adatok alapján meghatározza a robotunk összes transzformációját. Ezek a transzformációk a tf-ben állnak rendelkezésre, erről majd egy picit később részletesen beszélünk.
+- [RViz](http://wiki.ros.org/rviz), az RViz pedig egy univerzális megjelenítő, amit a félév során rengeteg dologra fogunk használni.
 
+Van továbbá 3 olyan argumentuma, ami a launch fájl indításakor command line-ból paraméterezhető a következő formában:  
+`roslaunch NODE LAUNCHFILE ARG:=VALUE`
+
+Mivel ezeknek a argumentumoknak van default értéke, így ebben az esetben nem kell kitöltenünk, kizárólag a default értékek felülbírására való.
+
+Van továbbá 2 paraméter is a launchfile-ban. Ezek bekerülnek a ROS paraméter szerverébe minden node számára elérhető formában, így szedi össze a robot modelljét az RViz is. A ROS paraméter szerevere a [ROS master része](http://wiki.ros.org/Parameter%20Server). Innen ismeri a joint state publisher és a robot state publisher is az URDF modellünket.
+
+Az éppen futó ROS paramétereinek bármikor meg tudjuk nézni a `rosparam list` paranccsal, valamint egy adott paraméter értékét a `rosparam get /PARAMETER` paranccsal.
+
+Ha például létrehozunk egy újabb paramétert:
+```xml
+<param name="hello" value="HELLO WORLD!"/>
+```
+
+Akkor a következőt látjuk a fenti parancsok után:
+
+```console
+david@DavidsLenovoX1:~$ rosparam list
+/hello
+/robot_description
+/rosdistro
+/roslaunch/uris/host_172_30_22_32__37359
+/rosversion
+/run_id
+/use_gui
+david@DavidsLenovoX1:~$ rosparam get /hello
+HELLO WORLD!
+```
+
+Indítsuk is el akkor a launchfile-t:  
+`roslaunch bme_gazebo_basics check_urdf.launch`
+
+Az RViz mutatja a modellünket, valamint a transzformációkat.  
+![alt text][image19]
+
+A joint state publisher GUI-ja segítségével pedig állíthatjuk a meglévő jointunk szögét.  
+![alt text][image25]
 
 ## URDF / Xacro készítése
 
-
+Mivel Gazebo-ból nem érdemes modellt exportálnunk, akkor hogyan csináljuk meg a robotunk modelljét URDF-ben?
 
 ```xml
 <?xml version='1.0'?>
@@ -334,6 +394,8 @@ roslaunch bme_gazebo_basics check_urdf.launch
 
 </robot>
 ```
+
+![alt text][image13]
 
 roslaunch bme_gazebo_basics check_urdf.launch model:='$(find bme_gazebo_basics)/urdf/mogi_bot.xacro' rvizconfig:='$(find bme_gazebo_basics)/rviz/mogi_bot.rviz'
 
@@ -410,6 +472,8 @@ Adjunk hozzá 2 kereket is a `</robot>` tag elé:
     </visual>
   </link>
 ```
+
+![alt text][image14]
 
 roslaunch bme_gazebo_basics check_urdf.launch model:='$(find bme_gazebo_basics)/urdf/mogi_bot.xacro' rvizconfig:='$(find bme_gazebo_basics)/rviz/mogi_bot.rviz'
 
@@ -637,6 +701,8 @@ A teleop_twist_keyboard alapból a cmd_vel topicra küldi a Twist üzenetét, í
 </launch>
 ```
 
+
+# TF
 
 # Odometria a ROS-ban
 
