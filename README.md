@@ -25,6 +25,9 @@
 [image23]: ./assets/gazebo_13.png "Gazebo" 
 [image24]: ./assets/gazebo_14.png "Gazebo"
 [image25]: ./assets/simple_model_2.png "Simple model"
+[image26]: ./assets/mogi_bot_7.png "MOGI bot"
+[image27]: ./assets/diff_drive_1.png "Diff drive"
+[image28]: ./assets/diff_drive_2.png "Diff drive"
 
 # 3. - 4. hét - Gazebo és URDF
 
@@ -505,9 +508,11 @@ Nyissuk meg ugyanúgy RVizben:
 ![alt text][image14]
 
 
-
-
 ## URDF betöltése (spawn) Gazebo-ba és RViz-be
+
+Készítsünk egy launchfile-t (`spawn_robot.launch`), ami betölti a robot modellt RVizbe, ahogy az előbb, de beteszi a robotot a fizikai szimulációba is.
+
+A `spawn_robot.launch` tartalma:
 
 ```xml
 <?xml version="1.0"?>
@@ -552,20 +557,33 @@ Nyissuk meg ugyanúgy RVizben:
 </launch>
 ```
 
-A robot kezdőpozíciója tetszőlegesen szerkeszthető a launchfile-ban, vagy a launchfile indításakor paraméterként:  
+A robot kezdőpozíciója (és orientációja) tetszőlegesen szerkeszthető a launchfile-ban, vagy a launchfile indításakor paraméterként:  
 `roslaunch bme_gazebo_basics spawn_robot.launch yaw:=1.57`
 
-## Plugin
+![alt text][image26]
 
+## Gazebo plugin
 
+Mostmár be tudjuk tölteni a modellünket a fizikai szimulációba, de nem tudjuk megmozdítani még. Ehhez szükségünk van egy Gazebo pluginre. A szimulációban egy differenciálhajtású robotunk lesz két kerékkel, ehhez [ezt](http://gazebosim.org/tutorials?tut=ros_gzplugins#DifferentialDrive) a Gazebo plugint fogjuk használni.
 
-### differenciálhajtás
+### Differenciálhajtás
 
-Mostmár van egy robotunk, amit be tudunk illeszteni a fizikai szimulációba, vannak kerekei is, azonban egyelőre nem tudjuk vezetni.
+A [differenciálhajtású](https://en.wikipedia.org/wiki/Differential_wheeled_robot) robot egy egyszerű két kerekű robot, tipikusan ilyenek a robotporszívók vagy akár a hoverboardok. A robot fordulókörének a sugara (`R`), a fordulási sebessége (`ω`) és a kerekeinek sebeségei (`v`<sub>`l`</sub> és `v`<sub>`r`</sub>) között a lenti egyenletek írhatók fel, ahol a két kerék távolságával (`l`). 
 
-http://gazebosim.org/tutorials?tut=ros_gzplugins#DifferentialDrive
+![alt text][image27]
 
-Hozzunk létre egy mogi_bot.gazebo fájlt az urdf mappában.
+![alt text][image28]
+
+[[forrás](http://www.cs.columbia.edu/~allen/F17/NOTES/icckinematics.pdf)]
+
+A fenti egyenletek alapján 3 speciális eset adódik:  
+1) `v`<sub>`l`</sub> `= v`<sub>`r`</sub>, ekkor az `R` fordulókör sugara végtelen a `ω` fordulási sebesség pedig 0. A robot tehát egyenesen halad.
+2) `v`<sub>`l`</sub> `= -v`<sub>`r`</sub>, ekkor `R = 0` tehát a forgás középpontja pontosan a két kerék között helyezkedik el. A robot tehát egyhelyben forog.
+3) `v`<sub>`l`</sub> `= 0` vagy `v`<sub>`r`</sub> `= 0`, ebben az esetben `R = l/2` vagyis a forgás középpontja az álló kerék. A robot ilyenkor pontosan az álló kerék körül forog.
+
+Hasonlóan egyszerű fordítva is, a kerekek távolságából és a kerekek sebességéből egyszerűen integrálható a robot által megtett útvonal. Nagy vonalakban ezeknek az egyenleteknek az implmentációját valósítja meg az általunk használt Gazebo plugin, tehát egy sor kódot sem kell írnunk!
+
+Hozzunk létre egy `mogi_bot.gazebo` fájlt az urdf mappában, ebben írjuk le a plugint.
 
 ```xml
 <?xml version="1.0"?>
@@ -597,13 +615,25 @@ Hozzunk létre egy mogi_bot.gazebo fájlt az urdf mappában.
 </robot>
 ```
 
-Majd adjuk hozzá ezt a fájlt a xacro fájlunkhoz:
+Majd adjuk hozzá ezt a fájlt a robotunk leírásához a `mogi_bot.xacro` fájlunkhoz:
+```xml
+<xacro:include filename="$(find bme_gazebo_basics)/urdf/mogi_bot.gazebo" />
+```
 
-`<xacro:include filename="$(find bme_gazebo_basics)/urdf/mogi_bot.gazebo" />`
+Még a `<link name="base_footprint"></link>` előtt, tehát így kell kinéznie a `mogi_bot.xacro` fájlunknak:
+```xml
+<?xml version='1.0'?>
 
-Még a `<link name="base_footprint"></link>` előtt!
+<robot name="mogi_bot" xmlns:xacro="http://www.ros.org/wiki/xacro">
 
-## cmd_vel
+  <xacro:include filename="$(find bme_gazebo_basics)/urdf/mogi_bot.gazebo" />
+
+  <link name="base_footprint"></link>
+
+  ...
+```
+
+## A robot mozgatása `cmd_vel` twist üzenettel
 
 A plugin beállításakor beállítottuk, hogy a szimulált robotunkat a cmd_vel topicon érkező Twist üzenettel lehet vezetni. 
 
@@ -611,17 +641,25 @@ A plugin beállításakor beállítottuk, hogy a szimulált robotunkat a cmd_vel
 <commandTopic>cmd_vel</commandTopic>                   <!-- Topic to receive geometry_msgs/Twist message commands, defaults to `cmd_vel` -->
 ```
 
-Innentől kezdve a robotunk egy Twist üzenetet vár és az irányítása gyakorlatilag megegyezik a Turtlesim vezetésével!
+Innentől kezdve a robotunk egy Twist üzenetet vár és onnantól az irányítása gyakorlatilag megegyezik a Turtlesim vezetésével!
 
-Akkor tehát használhatjuk a `rosrun turtlesim turtle_teleop_key`-t a robot irányítására? 
+Akkor tehát használhatjuk a `turtle_teleop_key`-t a robot irányítására? 
 
 Próbáljuk ki!
 
-A robot nem mozdul meg, ennek az az oka, hogy ugyan Twist üzenetet küld a távirányító és Twist üzenetet vár a robot is, azonban nem ugyanazon a topicon próbálnak kommunikálni!
-Az előzőekben használt eszközökkel is meg tudjuk ezt vizsgálni:
+Indítsuk el a robot szimulációját az előbbi paranccsal:  
+`roslaunch bme_gazebo_basics spawn_robot.launch`
 
-rosnode list
-rosnode info /turtle_teleop_key
+Majd indítsuk el a turtle_teleop_key-t:  
+`rosrun turtlesim turtle_teleop_key`
+
+### Hibakeresés
+
+A robot nem mozdul meg, ennek az az oka, hogy ugyan Twist üzenetet küld a távirányító és Twist üzenetet vár a robot is, azonban nem ugyanazon a topicon próbálnak kommunikálni!
+Az előzőekben használt eszközökkel is meg tudjuk ezt vizsgálni:  
+
+Használjuk a `rosnode list`, valamint a  
+`rosnode info /turtle_teleop_key` parancsokat:
 
 ```console
 Node [/turtle_teleop_key]
@@ -633,7 +671,7 @@ Subscriptions:
  * /clock [rosgraph_msgs/Clock]
 ```
 
-rosnode info /gazebo
+Ugyanígy nézzük meg a `rosnode info /gazebo` parancsot:
 
 ```console
 Node [/gazebo]
@@ -654,11 +692,11 @@ Subscriptions:
  * /gazebo/set_model_state [unknown type]
 ```
 
-Vagy a rostopic segítségével
+Megvizsgálhatjuk a rostopic segítségével is  
 
-rostopic list
+`rostopic list`
 
-rostopic info /turtle1/cmd_vel
+`rostopic info /turtle1/cmd_vel`
 
 ```console
 Type: geometry_msgs/Twist
@@ -669,7 +707,7 @@ Publishers:
 Subscribers: None
 ```
 
-rostopic info /cmd_vel
+`rostopic info /cmd_vel`
 
 ```console
 Type: geometry_msgs/Twist
@@ -680,9 +718,15 @@ Subscribers:
  * /gazebo (http://172.17.19.175:40875/)
 ```
 
-Egy másik nagyon hasznos eszköz az rqt_graph:
+Egy másik nagyon hasznos eszköz a hibakeresés során az `rqt_graph`!
 
-rqt_graph
+Indítsuk el az `rqt_graph` paranccsal.
+
+![alt text][image18]
+
+Ahogy látjuk a `/turtle_teleop_key` node nincs összekötve a `/gazebo` node-dal.
+
+### A megoldás - `remap`
 
 Tehát használhatjuk ezt az irányításra, viszont alapértelmezetten a `turtle_teleop_key` más topicba (`/turtle1/cmd_vel`) küldi az üzeneteket. Módosíthatnánk a Gazebo plugint, hogy a megfelelő topicon várja a Twist üzenetet, azonban az a konvenció a ROS-ban, hogy a robotunkat a cmd_vel topicon érkező Twist üzenettel mozgatjuk.
 
@@ -701,6 +745,8 @@ Megoldás: csomagoljuk be egy launchfile-ba a turtle_teleop_key-t, és irányít
 ```
 
 rqt_graph
+
+![alt text][image17]
 
 Azért ez még mindig nem az igazi, mert nem tudunk megállni. De van erre egy [megfelelő ROS csomag](http://wiki.ros.org/key_teleop)!  
 Azonban ez sem a cmd_vel topicra küldi a Twist üzeneteket alapból, hanem a key_vel-re, így tegyük be ezt a launchfile-ba, és mappeljük át a topicot!
