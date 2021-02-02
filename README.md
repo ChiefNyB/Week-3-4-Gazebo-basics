@@ -226,21 +226,32 @@ optional arguments:
 
 `rosrun pysdf sdf2urdf.py ~/catkin_ws/src/Week-3-4-Gazebo-basics/bme_gazebo_basics/urdf/simple_model/model.sdf ~/catkin_ws/src/Week-3-4-Gazebo-basics/bme_gazebo_basics/urdf/simple_model.urdf`
 
-A konverzió után van még egy kis javítani valónk a jointtal, ezért nem érdemes SDF fájlba mentenünk a robotjainkat.
+A konverzió után van még egy kis javítani valónk a két testet összekötő jointtal, ugyanis a következő lépésben hibára futnánk.
+A gazebó nem végtelenül forgó `continuous` jointtal geneárlta a fájlt, hanem limitált `revolute` jointtal és 10<sup>308</sup>-on radián limittel. Ez a következő nem túl egyértelmű hibát fogja eredményezni:
 
-A `revolute` típusú jointunkat `continuous`-re kell cseréljük:
-```xml
-<?xml version="1.0" ?>
-<robot name="simple_model">
-  <joint name="simple_model__link_1_JOINT_0" type="revolute">
-...
+```console
+Traceback (most recent call last):
+  File "/opt/ros/melodic/lib/joint_state_publisher_gui/joint_state_publisher_gui", line 53, in <module>
+    num_rows)
+  File "/opt/ros/melodic/lib/python2.7/dist-packages/joint_state_publisher_gui/__init__.py", line 124, in __init__
+    self.center()
+  File "/opt/ros/melodic/lib/python2.7/dist-packages/joint_state_publisher_gui/__init__.py", line 181, in center
+    joint_info['slider'].setValue(self.valueToSlider(joint['zero'], joint))
+TypeError: setValue(self, int): argument 1 has unexpected type 'float'
 ```
 
+A helyes megoldás erre az, hogy:
+1) A `revolute` típusú jointunkat `continuous`-re változtatjuk.
+2) Csökkentjük a joint limitjét pl +/- 10 radiánra.
+
 ```xml
-<?xml version="1.0" ?>
-<robot name="simple_model">
-  <joint name="simple_model__link_1_JOINT_0" type="continuous">
-...
+  <joint name="simple_model__link_1_JOINT_0" type="revolute">
+    <parent link="simple_model__link_1"/>
+    <child link="simple_model__link_0"/>
+    <origin rpy="-1.5708  0      0" xyz="-0.00269 -0.28628  0"/>
+    <axis xyz="0  0  1"/>
+    <limit effort="-1.0" lower="-1.79769e+308" upper="1.79769e+308" velocity="-1.0"/>
+  </joint>
 ```
 
 Ezek után meg tudjuk nyitni az átkonvertált modellünket!
@@ -320,7 +331,17 @@ A joint state publisher GUI-ja segítségével pedig állíthatjuk a meglévő j
 
 ## URDF / Xacro készítése
 
-Mivel Gazebo-ból nem érdemes modellt exportálnunk, akkor hogyan csináljuk meg a robotunk modelljét URDF-ben?
+Mivel Gazebo-ból nem érdemes modellt exportálnunk a fentiek miatt, akkor hogyan csináljuk meg a robotunk modelljét URDF-ben?
+
+A legegyszerűbb megoldás az, hogy kézzel. Az URDF fájl egy speciális `xml` fájl, amiben linkeket és jointokat definiálunk. A leggyakrabban használt joint típusok a `fixed` as a korábban is látott `continuous` és `revolute`. A `fixed` jointok statikus transzformációk, ilyen lehet például egy szenzor vagy egy kamera elhelyezkedése a robot alvázához képest. A `continuous` egy limit nélküli forgó joint, ilyenek például a kerekek. A `revolute` jointok pedig olyan forgó jointok, amiknek alsó és felső szöglimitjei vannak, ilyenek tipikusan a robotkarok jointjai.
+
+Mielőtt még elkészítenénk az URDF fájlunkat, érdemes megjegyezni, hogy valójában xacro fájlt fogunk készíteni, ami az URDF kiterjesztése, de ennek a részleteibe most nem megyünk bele.
+
+### A robot alváza
+
+A lenndő robotunk egy differenciálhajtású robot lesz 1-1 kerékkel a két oldalon. Azonban mielőtt a kerekeket hozzáadnánk, csináljuk meg a robot alvázát, ami a `base_footprint`-ből kiinduló `base_link` lesz, rajta két gömbkerékkel elöl és hátul.
+
+Hozzuk létre a `mogi_bot.xacro` fájlt az urdf mappán belül.
 
 ```xml
 <?xml version='1.0'?>
@@ -395,11 +416,16 @@ Mivel Gazebo-ból nem érdemes modellt exportálnunk, akkor hogyan csináljuk me
 </robot>
 ```
 
+Minden link tartalmaz legalább 1 `inertial`, `collision` és `visual` attribútumokat. A `visual` és `collision` a későbbiek során látjuk majd, hogy eltérhet, mert sok esetben elegendő egy egyszerűbb `collision` modell és egy látványosabb `visual` modell.
+
+Az korábban használt launch fájlunkat felhasználva jelenítsük meg a robotot RViz-ben:  
+`roslaunch bme_gazebo_basics check_urdf.launch model:='$(find bme_gazebo_basics)/urdf/mogi_bot.xacro' rvizconfig:='$(find bme_gazebo_basics)/rviz/mogi_bot.rviz'`
+
 ![alt text][image13]
 
-roslaunch bme_gazebo_basics check_urdf.launch model:='$(find bme_gazebo_basics)/urdf/mogi_bot.xacro' rvizconfig:='$(find bme_gazebo_basics)/rviz/mogi_bot.rviz'
+### A robot kerekei
 
-Adjunk hozzá 2 kereket is a `</robot>` tag elé:
+Adjunk hozzá 2 kereket is a fájl végére a `</robot>` tag elé. A kerekek `continuous` jointtal csatlakoznak a robot alvázához (`base_link`) annak közepén.
 
 ```xml
   <joint type="continuous" name="left_wheel_joint">
@@ -473,9 +499,12 @@ Adjunk hozzá 2 kereket is a `</robot>` tag elé:
   </link>
 ```
 
+Nyissuk meg ugyanúgy RVizben:  
+`roslaunch bme_gazebo_basics check_urdf.launch model:='$(find bme_gazebo_basics)/urdf/mogi_bot.xacro' rvizconfig:='$(find bme_gazebo_basics)/rviz/mogi_bot.rviz'`
+
 ![alt text][image14]
 
-roslaunch bme_gazebo_basics check_urdf.launch model:='$(find bme_gazebo_basics)/urdf/mogi_bot.xacro' rvizconfig:='$(find bme_gazebo_basics)/rviz/mogi_bot.rviz'
+
 
 
 ## URDF betöltése (spawn) Gazebo-ba és RViz-be
@@ -720,8 +749,11 @@ Adjuk hozzá a spawn_robot.launch fájlunkhoz a trajektória mentését, ehhez a
 
 nézzük meg most a node-jainkat az rqt_graph segítségével!
 
+# Színek
 
-### Skid steer (opcionális)
+# 3D modell, Collada fájl
+
+# Skid steer (opcionális)
 cseréljük le a 2 gömbkereket még két kerékre, és csináljunk egy 4 kerekű skid steer robotot.
 
 http://gazebosim.org/tutorials?tut=ros_gzplugins#SkidSteeringDrive
