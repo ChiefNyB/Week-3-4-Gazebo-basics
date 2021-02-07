@@ -641,7 +641,7 @@ A plugin beállításakor beállítottuk, hogy a szimulált robotunkat a cmd_vel
 <commandTopic>cmd_vel</commandTopic>                   <!-- Topic to receive geometry_msgs/Twist message commands, defaults to `cmd_vel` -->
 ```
 
-Innentől kezdve a robotunk egy Twist üzenetet vár és onnantól az irányítása gyakorlatilag megegyezik a Turtlesim vezetésével!
+Innentől kezdve a robotunk egy Twist típusú üzenetet vár és onnantól az irányítása gyakorlatilag megegyezik a Turtlesim vezetésével!
 
 Akkor tehát használhatjuk a `turtle_teleop_key`-t a robot irányítására? 
 
@@ -655,7 +655,7 @@ Majd indítsuk el a turtle_teleop_key-t:
 
 ### Hibakeresés
 
-A robot nem mozdul meg, ennek az az oka, hogy ugyan Twist üzenetet küld a távirányító és Twist üzenetet vár a robot is, azonban nem ugyanazon a topicon próbálnak kommunikálni!
+A robot nem mozdul meg, ennek az az oka, hogy ugyan Twist típusú üzenetet küld a távirányító és Twist típusú üzenetet vár a szimulált robot is, azonban nem ugyanazon a topicon próbálnak kommunikálni!
 Az előzőekben használt eszközökkel is meg tudjuk ezt vizsgálni:  
 
 Használjuk a `rosnode list`, valamint a  
@@ -692,7 +692,7 @@ Subscriptions:
  * /gazebo/set_model_state [unknown type]
 ```
 
-Megvizsgálhatjuk a rostopic segítségével is  
+Megvizsgálhatjuk a problémát a rostopic segítségével is  
 
 `rostopic list`
 
@@ -707,7 +707,7 @@ Publishers:
 Subscribers: None
 ```
 
-`rostopic info /cmd_vel`
+valamint `rostopic info /cmd_vel`
 
 ```console
 Type: geometry_msgs/Twist
@@ -724,7 +724,7 @@ Indítsuk el az `rqt_graph` paranccsal.
 
 ![alt text][image18]
 
-Ahogy látjuk a `/turtle_teleop_key` node nincs összekötve a `/gazebo` node-dal.
+Ahogy látjuk a `/turtle_teleop_key` node-ot nem köti össze topic a `/gazebo` node-dal.
 
 ### A megoldás - `remap`
 
@@ -744,12 +744,12 @@ Megoldás: csomagoljuk be egy launchfile-ba a turtle_teleop_key-t, és irányít
 </launch>
 ```
 
-rqt_graph
+Indítsuk el a launchfile-t ls nézzük meg az `rqt_graph` parancsot!
 
 ![alt text][image17]
 
-Azért ez még mindig nem az igazi, mert nem tudunk megállni. De van erre egy [megfelelő ROS csomag](http://wiki.ros.org/key_teleop)!  
-Azonban ez sem a cmd_vel topicra küldi a Twist üzeneteket alapból, hanem a key_vel-re, így tegyük be ezt a launchfile-ba, és mappeljük át a topicot!
+A turtle_teleop_key nem igazán praktikus, mert nem tudunk megállni. De van erre egy [megfelelő ROS csomag](http://wiki.ros.org/key_teleop)!  
+Azonban ez sem a cmd_vel topicra küldi a Twist üzeneteit alapból, hanem a key_vel-re. Megváltoztathatnánk a plugin beállításunkat, de inkább tegyük be ezt is a launchfile-ba, és mappeljük át a topicot!
 
 ```xml
 <?xml version="1.0" encoding="UTF-8"?>
@@ -763,8 +763,8 @@ Azonban ez sem a cmd_vel topicra küldi a Twist üzeneteket alapból, hanem a ke
 </launch>
 ```
 
-Vagy egy másik lehetőség egy [összetettebb parancssoros irányító node](http://wiki.ros.org/teleop_twist_keyboard)!  
-A teleop_twist_keyboard alapból a cmd_vel topicra küldi a Twist üzenetét, így ezt nem kell átirányítanunk!
+Vagy egy másik lehetőség egy [összetettebb parancssoros távirányító node](http://wiki.ros.org/teleop_twist_keyboard)!  
+A teleop_twist_keyboard alapból a cmd_vel topicra küldi a Twist üzenetét, így ezt nem is kell átirányítanunk!
 
 ```xml
 <?xml version="1.0" encoding="UTF-8"?>
@@ -778,6 +778,7 @@ A teleop_twist_keyboard alapból a cmd_vel topicra küldi a Twist üzenetét, í
 
 
 # TF
+
 
 # Odometria a ROS-ban
 
