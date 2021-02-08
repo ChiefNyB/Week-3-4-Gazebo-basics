@@ -2,10 +2,13 @@
 
 <robot name="mogi_bot" xmlns:xacro="http://www.ros.org/wiki/xacro">
 
-  <!-- STEP 3 -->
+  <!-- STEP 3 - Gazebo plugin -->
   <xacro:include filename="$(find bme_gazebo_basics)/urdf/mogi_bot.gazebo" />
 
-  <!-- STEP 1 -->
+  <!-- STEP 4 - RViz colors -->
+  <xacro:include filename="$(find bme_gazebo_basics)/urdf/materials.xacro" />
+
+  <!-- STEP 1 - Robot chassis -->
   <link name="base_footprint"></link>
 
   <joint name="base_footprint_joint" type="fixed">
@@ -37,8 +40,10 @@
     <visual name='base_link_visual'>
       <origin xyz="0 0 0" rpy=" 0 0 0"/>
       <geometry>
-        <box size=".4 .2 .1"/>
+        <!--box size=".4 .2 .1"/-->
+        <mesh filename = "package://bme_gazebo_basics/meshes/mogi_bot.dae"/>
       </geometry>
+      <material name="orange"/>
     </visual>
 
     <collision name='rear_caster_collision'>
@@ -71,7 +76,7 @@
 
   </link>
 
-  <!-- STEP 2 -->
+  <!-- STEP 2 - Wheels -->
   <joint type="continuous" name="left_wheel_joint">
     <origin xyz="0 0.15 0" rpy="0 0 0"/>
     <child link="left_wheel"/>
@@ -102,8 +107,10 @@
     <visual name='left_wheel_visual'>
       <origin xyz="0 0 0" rpy="0 1.5707 1.5707"/>
       <geometry>
-        <cylinder radius=".1" length=".05"/>
+        <!--cylinder radius=".1" length=".05"/-->
+        <mesh filename = "package://bme_gazebo_basics/meshes/wheel.dae"/>
       </geometry>
+      <material name="green"/>
     </visual>
   </link>
 
@@ -137,9 +144,24 @@
     <visual name='right_wheel_visual'>
       <origin xyz="0 0 0" rpy="0 1.5707 1.5707"/>
       <geometry>
-        <cylinder radius=".1" length=".05"/>
+        <!--cylinder radius=".1" length=".05"/-->
+        <mesh filename = "package://bme_gazebo_basics/meshes/wheel.dae"/>
       </geometry>
+      <material name="green"/>
     </visual>
   </link>
+
+  <!-- STEP 4 - Gazebo colors -->
+  <!--gazebo reference="left_wheel">
+    <material>Gazebo/Green</material>
+  </gazebo>
+
+  <gazebo reference="right_wheel">
+    <material>Gazebo/Green</material>
+  </gazebo>
+
+  <gazebo reference="base_link">
+    <material>Gazebo/Orange</material>
+  </gazebo-->
 
 </robot>
