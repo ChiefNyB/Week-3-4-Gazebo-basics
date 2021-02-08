@@ -28,6 +28,13 @@
 [image26]: ./assets/mogi_bot_7.png "MOGI bot"
 [image27]: ./assets/diff_drive_1.png "Diff drive"
 [image28]: ./assets/diff_drive_2.png "Diff drive"
+[image29]: ./assets/mogi_bot_8.png "MOGI bot" 
+[image30]: ./assets/mogi_bot_9.png "MOGI bot" 
+[image31]: ./assets/mogi_bot_10.png "MOGI bot" 
+[image32]: ./assets/mogi_bot_11.png "MOGI bot" 
+[image33]: ./assets/mogi_bot_12.png "MOGI bot" 
+[image34]: ./assets/mogi_bot_13.png "MOGI bot" 
+[image35]: ./assets/mogi_bot_14.png "MOGI bot" 
 
 # 3. - 4. hét - Gazebo és URDF
 
@@ -508,7 +515,7 @@ Nyissuk meg ugyanúgy RVizben:
 ![alt text][image14]
 
 
-## URDF betöltése (spawn) Gazebo-ba és RViz-be
+# URDF betöltése (spawn) Gazebo-ba és RViz-be
 
 Készítsünk egy launchfile-t (`spawn_robot.launch`), ami betölti a robot modellt RVizbe, ahogy az előbb, de beteszi a robotot a fizikai szimulációba is.
 
@@ -562,11 +569,11 @@ A robot kezdőpozíciója (és orientációja) tetszőlegesen szerkeszthető a l
 
 ![alt text][image26]
 
-## Gazebo plugin
+# Gazebo plugin
 
 Mostmár be tudjuk tölteni a modellünket a fizikai szimulációba, de nem tudjuk megmozdítani még. Ehhez szükségünk van egy Gazebo pluginre. A szimulációban egy differenciálhajtású robotunk lesz két kerékkel, ehhez [ezt](http://gazebosim.org/tutorials?tut=ros_gzplugins#DifferentialDrive) a Gazebo plugint fogjuk használni.
 
-### Differenciálhajtás
+## Differenciálhajtás
 
 A [differenciálhajtású](https://en.wikipedia.org/wiki/Differential_wheeled_robot) robot egy egyszerű két kerekű robot, tipikusan ilyenek a robotporszívók vagy akár a hoverboardok. A robot fordulókörének a sugara (`R`), a fordulási sebessége (`ω`) és a kerekeinek sebeségei (`v`<sub>`l`</sub> és `v`<sub>`r`</sub>) között a lenti egyenletek írhatók fel, ahol a két kerék távolságával (`l`). 
 
@@ -633,7 +640,7 @@ Még a `<link name="base_footprint"></link>` előtt, tehát így kell kinéznie 
   ...
 ```
 
-## A robot mozgatása `cmd_vel` twist üzenettel
+# A robot mozgatása `cmd_vel` twist üzenettel
 
 A plugin beállításakor beállítottuk, hogy a szimulált robotunkat a cmd_vel topicon érkező Twist üzenettel lehet vezetni. 
 
@@ -653,7 +660,7 @@ Indítsuk el a robot szimulációját az előbbi paranccsal:
 Majd indítsuk el a turtle_teleop_key-t:  
 `rosrun turtlesim turtle_teleop_key`
 
-### Hibakeresés
+## Hibakeresés
 
 A robot nem mozdul meg, ennek az az oka, hogy ugyan Twist típusú üzenetet küld a távirányító és Twist típusú üzenetet vár a szimulált robot is, azonban nem ugyanazon a topicon próbálnak kommunikálni!
 Az előzőekben használt eszközökkel is meg tudjuk ezt vizsgálni:  
@@ -726,7 +733,7 @@ Indítsuk el az `rqt_graph` paranccsal.
 
 Ahogy látjuk a `/turtle_teleop_key` node-ot nem köti össze topic a `/gazebo` node-dal.
 
-### A megoldás - `remap`
+## A megoldás - `remap`
 
 Tehát használhatjuk ezt az irányításra, viszont alapértelmezetten a `turtle_teleop_key` más topicba (`/turtle1/cmd_vel`) küldi az üzeneteket. Módosíthatnánk a Gazebo plugint, hogy a megfelelő topicon várja a Twist üzenetet, azonban az a konvenció a ROS-ban, hogy a robotunkat a cmd_vel topicon érkező Twist üzenettel mozgatjuk.
 
@@ -779,12 +786,37 @@ A teleop_twist_keyboard alapból a cmd_vel topicra küldi a Twist üzenetét, í
 
 # TF
 
+A ROS folyamatosan nyílvántartja a robot egyes linkjeinek egymáshoz képesti transzformációit, ezt a TF (transzformáció) modul végzi a már korábban látott `robot_state_publisher` és `joint_state_publisher` segítségével. A linkek között több féle transzformáció lehetséges, ezek közül már sokkal találkoztunk:
+- fixed, ebben az esetben a transzformáció egy statikus eltolás és/vagy forgatás.
+- revolute és continuous forgó jointok
+- prismatic csúszó jointok
+- floating és planar jointok, amikkel egyelőre nem foglalkozunk
 
-# Odometria a ROS-ban
+Egy speciális transzformáció az odometria is, ami a robot alvázának (a mi esetünkben a `base_footprint`) elmozdulását mondja meg egy fix koordinátrandszerhez (`odom`) képest. A koordintátarendszer nevét a `differential_drive_controller` adtuk meg. Ameddig a robot mozog ez a transzformáció is folyamatosan változik a `base_footprint` link koordinátarendszere és az `odom` rögzített koordintátarendszer között.
 
+Egy valódi roboton az odometriát a kerekek jeladói és a robot pontos geometriájának ismeretében tudnánk kiszámítani, ahogy a differenciálhajtásnál már találkoztunk ezzel. Jelen esetben a motorok és a jeladók is a szimuláció részét képezik, tehát a robot odometriáját a Gazebo plugin adja nekünk.
+
+A transzformációk egy olyan gráfot adnak, ahol a gráf csomópontjai a robot egyes linkjei. Ezt a gráfot bármikor megnézhetjük az `rqt_tf_tree` segítségével.
+
+A következő paranccsal tudjuk elindítani:
+```console
 rosrun rqt_tf_tree rqt_tf_tree
+```
+Az eredmény pedig így néz ki:
 
-Adjuk hozzá a spawn_robot.launch fájlunkhoz a trajektória mentését, ehhez a [Hector trajectory server](https://wiki.ros.org/hector_trajectory_server)t fogjuk használni.
+![alt text][image21]
+
+
+## Odometria a ROS-ban
+
+Ha a robot odometria transzformációját fix időpillanatonként rögzítenénk, akkor megkapnánk a robot mozgásának teljes türténetét. Szerencsére erre is van kész megoldás a ROS-ban, a [Hector trajectory server](https://wiki.ros.org/hector_trajectory_server).
+
+Ez egy olyan csomag, ami nem része az alap ROS telepítésnek, de az Ubuntu csomagkezelőjével gond nélkül telepíthetjük:
+```console
+sudo apt install ros-melodic-hector-trajectory-server
+```
+
+Telepítés után, adjuk hozzá a `spawn_robot.launch` fájlunkhoz a trajektória mentését a `hector_trajectory_server` node hozzáadásával. A node használatához 2 dolgot kell beállítanunk, a két koordinátarendszert, amik között a transzformációt rögzíteni szeretnénk.
 
 ```xml
   <!-- Launch trajectory server -->
@@ -794,11 +826,105 @@ Adjuk hozzá a spawn_robot.launch fájlunkhoz a trajektória mentését, ehhez a
   </node>
 ```
 
-nézzük meg most a node-jainkat az rqt_graph segítségével!
+Índítsuk el a szimulációt a `roslaunch bme_gazebo_basics spawn_robot.launch` segítségével, illetve egy másik parancssorban indítsuk el a távirányítást a `roslaunch bme_gazebo_basics teleop.launch` paranccsal.
 
-# Színek
+![alt text][image20]
 
-# 3D modell, Collada fájl
+Nézzük meg most a node-jainkat az `rqt_graph` segítségével!
+
+![alt text][image22]
+
+# A robot megjelenése
+
+Tehát van egy működő robotunk, amit szimulálunk a Gazeboban és megjelenítünk RVizben. Gazeboban azonban az egész fehér, RVizben pedig az egész piros. Hogyan tudnánk kiszínezni?
+
+## Színek
+
+Külön kell színeznünk Gazeboban és RVizben.
+
+### RViz színek
+
+RViz esetén az URDF-ünkben szereplő egyes linkek `visual` tagjében kell megadnunk a színt egy `material` attribútummal.
+Példa:
+```xml
+    <visual name='left_wheel_visual'>
+      <origin xyz="0 0 0" rpy="0 1.5707 1.5707"/>
+      <geometry>
+        <cylinder radius=".1" length=".05"/>
+      </geometry>
+      <material name="green"/>
+    </visual>
+```
+
+Akkor tudunk ilyen egyszerűen színeket hivatkozni, ha az URDF fájlunk elején meghivatkozzuk a `materials.xacro` fájlt, amiben előre létrehoztam pár színt.
+
+Színezzük a robot alvázát narancs színűre a kerekeit pedig zöldre.
+
+```xml
+<xacro:include filename="$(find bme_gazebo_basics)/urdf/materials.xacro" />
+```
+![alt text][image29]
+
+A robot modell átlátszóságát az `alpha` érték változattásával tudjátok állítani.
+
+### Gazebo színek
+
+Gazeboban viszont továbbra is fehér a modell. Ezt is az URDF-ben tudjuk megoldani, de a Gazebo más formában várja a material megadását. Adjuk hozzá az URDF fájlhoz a következőt:
+
+```xml
+  <gazebo reference="left_wheel">
+    <material>Gazebo/Green</material>
+  </gazebo>
+```
+Ugyanúgy színezzük ki a kerekeket zöldre az alvázat pedig narancssárgára.
+
+![alt text][image30]
+
+
+## 3D modell, Collada fájl
+
+A robotunk modelljét azonban nem csak táglatestekből és hengerekből építhetjük meg amiket kiszínezhetünk, hanem 3D modelleket is használhatunk. Praktikus azonban a linkek `collision`-jét ilyen egyszerű testeknek megtartani, mert a szimulációnak sokkal kevesebbet kell számolnia, mint egy bonyolul mesh esetén. A `visual` tagben viszont gond nélkül kicserélhetjük.
+
+Az URDF fájlokban Collada (.dae) vagy STL fájlokat lehet meshként használni. STL esetén sajnos nincs lehetőség a meshen belül különböző színeket használni, ezért a Collada meshek a javasoltak. De hogyan készítünk Collada fájlokat?
+
+Sajnos a CAD szoftverek nem exportálnak Collada formátumba, ezért ezek előállítására a Blendert javaslom.
+
+Ha CAD SW-ből exportáltok STL-t, amit aztán Blenderrel alakítotok át Collada mesh-sé, akkor javaslom, hogy minden méretezést és forgatást Blenderben csináljatok meg, ahogy a színezést is.
+
+![alt text][image31]
+
+A kísérletezés során praktikus az RViz betöltő launch fájlunkat használni:
+```console
+roslaunch bme_gazebo_basics check_urdf.launch model:='$(find bme_gazebo_basics)/urdf/mogi_bot.xacro' rvizconfig:='$(find bme_gazebo_basics)/rviz/mogi_bot.rviz'
+```
+
+Ez sokat segít abban, ha például skálázási vagy forgatási hiba van:
+
+![alt text][image32]
+
+Egy Blenderben színezett és átméretezett modell:
+
+![alt text][image33]
+
+A modelleket az URDF fájlban a `visual` tag alatt hivatkozzuk meg a következő formában:
+```xml
+    <visual name='base_link_visual'>
+      <origin xyz="0 0 0" rpy=" 0 0 0"/>
+      <geometry>
+        <!--box size=".4 .2 .1"/-->
+        <mesh filename = "package://bme_gazebo_basics/meshes/mogi_bot.dae"/>
+      </geometry>
+      <material name="orange"/>
+    </visual>
+```
+
+A `material` attribútumnak ilyen esetben nincs jelentősége, de nyugodtan maradhat, az RViz-t nem zavarja.
+
+![alt text][image35]
+
+Gazebo esetén azonban meg kell szüntetni a színezést, különben nem látszanak majd a modellünk textúrái.
+
+![alt text][image34]
 
 # Skid steer (opcionális)
 cseréljük le a 2 gömbkereket még két kerékre, és csináljunk egy 4 kerekű skid steer robotot.
