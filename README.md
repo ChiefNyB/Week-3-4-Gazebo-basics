@@ -35,6 +35,8 @@
 [image33]: ./assets/mogi_bot_12.png "MOGI bot" 
 [image34]: ./assets/mogi_bot_13.png "MOGI bot" 
 [image35]: ./assets/mogi_bot_14.png "MOGI bot" 
+[image36]: ./assets/skid_steer_1.png "Skid steer" 
+[image37]: ./assets/skid_steer_2.png "Skid steer" 
 
 # 3. - 4. hét - Gazebo és URDF
 
@@ -528,6 +530,7 @@ A `spawn_robot.launch` tartalma:
 
   <!-- RViz config file -->
   <arg name="rvizconfig" default="$(find bme_gazebo_basics)/rviz/mogi_world.rviz" />
+  <arg name="model" default="$(find bme_gazebo_basics)/urdf/mogi_bot.xacro"/>
 
   <!-- Robot pose -->
   <!-- Inititalize it's position in the desired location inside the world -->
@@ -542,7 +545,7 @@ A `spawn_robot.launch` tartalma:
   <include file="$(find bme_gazebo_basics)/launch/world.launch"/>
 
   <!-- Find mogi_bot description and send urdf to param server -->
-  <param name="robot_description" command="$(find xacro)/xacro --inorder '$(find bme_gazebo_basics)/urdf/mogi_bot.xacro'" />
+  <param name="robot_description" command="$(find xacro)/xacro.py $(arg model)" />
 
   <!-- Send joint values-->
   <node name="joint_state_publisher" pkg="joint_state_publisher" type="joint_state_publisher">
@@ -554,9 +557,9 @@ A `spawn_robot.launch` tartalma:
 
   <!-- Spawn mogi_bot -->
   <node name="urdf_spawner" pkg="gazebo_ros" type="spawn_model" respawn="false" output="screen" 
-        args="-urdf -param robot_description -model mogi_bot 
-              -x $(arg x) -y $(arg y) -z $(arg z)
-              -R $(arg roll) -P $(arg pitch) -Y $(arg yaw)"/>
+    args="-urdf -param robot_description -model mogi_bot 
+            -x $(arg x) -y $(arg y) -z $(arg z)
+            -R $(arg roll) -P $(arg pitch) -Y $(arg yaw)"/>
 
   <!-- Launch RViz -->
   <node name="rviz" pkg="rviz" type="rviz" args="-d $(arg rvizconfig)" required="true" />
@@ -564,7 +567,9 @@ A `spawn_robot.launch` tartalma:
 </launch>
 ```
 
-A robot kezdőpozíciója (és orientációja) tetszőlegesen szerkeszthető a launchfile-ban, vagy a launchfile indításakor paraméterként:  
+A korábbi launchfájlhoz képest egy új node-ot használunk, ez az `spawn_model`, ahogy a neve is mutatja, ez helyezi el az URDF modellünket a Gazebo szimulációban.
+
+A robot kezdőpozíciója (és orientációja) tetszőlegesen szerkeszthető a launchfile-ban, vagy a launchfile indításakor paraméterként, például:  
 `roslaunch bme_gazebo_basics spawn_robot.launch yaw:=1.57`
 
 ![alt text][image26]
@@ -927,10 +932,20 @@ Gazebo esetén azonban meg kell szüntetni a színezést, különben nem látsza
 ![alt text][image34]
 
 # Skid steer (opcionális)
-cseréljük le a 2 gömbkereket még két kerékre, és csináljunk egy 4 kerekű skid steer robotot.
+Cseréljük le a 2 gömbkereket még két kerékre, és csináljunk egy 4 kerekű skid steer robotot. A következő Gazebo plugint lehet használni erre a célra:
+[Skid steer drive](http://gazebosim.org/tutorials?tut=ros_gzplugins#SkidSteeringDrive)
 
-http://gazebosim.org/tutorials?tut=ros_gzplugins#SkidSteeringDrive
+A módosításokat a `mogi_bot_skid_steer.xacro` és a `mogi_bot_skid_steer.gazebo` fájlokban találjátok.
 
+A `spawn_robot.launch` fájlt el tudjuk indítani a másik modellel a következő paranccsal:
+```console
+roslaunch bme_gazebo_basics spawn_robot.launch model:='$(find bme_gazebo_basics)/urdf/mogi_bot_skid_steer.xacro'
+```
+
+A 4 kerekű skid steer robot így néz ki Gazeboban és RVizben:  
+
+![alt text][image36]
+![alt text][image37]
 ---
 
 
