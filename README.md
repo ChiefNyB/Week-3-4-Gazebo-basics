@@ -55,7 +55,7 @@ A Gazebo egy önálló fizikai szimulációs környezet, nem a ROS része, azonb
 
 Ha a `ros-melodic-desktop-full` csomagot telepítettétek, akkor a Gazebo már telepítve van.
 
-Ha valamiért mégsincs telepítve akkor a `sudo apt install gazebo9` vagy `gazebo11` paranccsal tudjátok telepíteni.  
+Ha valamiért még sincs telepítve akkor a `sudo apt install gazebo9` vagy `gazebo11` paranccsal tudjátok telepíteni.  
 A Gazebo-t a `gazebo` paranccsal tudjuk elindítani. És a következő képernyővel indul:  
 ![alt text][image1]
 
@@ -125,9 +125,7 @@ Adjunk hozzá egy hengert majd egy kockát. A hengert méretezzük át és forga
 
 ![alt text][image5]
 
-Állítsunk be egy jointot
-
-Mentsük el a `~/catkin_ws/src/bme_gazebo_basics/urdf` alá simple model néven. Valójában egy mappát fogunk elmenteni, amiben lesz egy `model.sdf` és egy `model.config` fájl. Nemsokára megnézzük mit tudunk csinálni ezzel a modellel!
+Állítsunk be egy jointot, majd mentsük el a `~/catkin_ws/src/bme_gazebo_basics/urdf` alá `simple_model` néven. Valójában egy mappát fogunk elmenteni, amiben lesz egy `model.sdf` és egy `model.config` fájl. Nemsokára megnézzük mit tudunk csinálni ezzel a modellel!
 
 ## Building editor
 
@@ -156,11 +154,11 @@ Elmenthetjük az épületet sdf fájlként, és visszatérhetünk a Gazebohoz. F
 
 ![alt text][image11]
 
-Opcionális: tehetünk bele pár objektumot a gazebo model libraryből:
+Opcionális: tehetünk bele pár objektumot a Gazebo model libraryből:
 
 ![alt text][image12]
 
-Mentsük el a gazebo világot world_modified.world néven, ezt fogjuk betölteni Gazebo-ba a szimuláció során.
+Mentsük el a Gazebo világot world_modified.world néven, ezt fogjuk betölteni Gazebo-ba a szimuláció során.
 
 Ki is tudjuk próbálni az elmentett világ betöltését Gazeboba:  
 `gazebo world_modified.world`
@@ -239,7 +237,7 @@ optional arguments:
 `rosrun pysdf sdf2urdf.py ~/catkin_ws/src/Week-3-4-Gazebo-basics/bme_gazebo_basics/urdf/simple_model/model.sdf ~/catkin_ws/src/Week-3-4-Gazebo-basics/bme_gazebo_basics/urdf/simple_model.urdf`
 
 A konverzió után van még egy kis javítani valónk a két testet összekötő jointtal, ugyanis a következő lépésben hibára futnánk.
-A gazebó nem végtelenül forgó `continuous` jointtal geneárlta a fájlt, hanem limitált `revolute` jointtal és 10<sup>308</sup>-on radián limittel. Ez a következő nem túl egyértelmű hibát fogja eredményezni:
+A Gazebo nem végtelenül forgó `continuous` jointtal geneárlta a fájlt, hanem limitált `revolute` jointtal és 10<sup>308</sup>-on radián limittel. Ez a következő nem túl egyértelmű hibát fogja eredményezni:
 
 ```console
 Traceback (most recent call last):
@@ -351,7 +349,7 @@ Mielőtt még elkészítenénk az URDF fájlunkat, érdemes megjegyezni, hogy va
 
 ### A robot alváza
 
-A lenndő robotunk egy differenciálhajtású robot lesz 1-1 kerékkel a két oldalon. Azonban mielőtt a kerekeket hozzáadnánk, csináljuk meg a robot alvázát, ami a `base_footprint`-ből kiinduló `base_link` lesz, rajta két gömbkerékkel elöl és hátul.
+A leendő robotunk egy differenciálhajtású robot lesz 1-1 kerékkel a két oldalon. Azonban mielőtt a kerekeket hozzáadnánk, csináljuk meg a robot alvázát, ami a `base_footprint`-ből kiinduló `base_link` lesz, rajta két gömbkerékkel elöl és hátul.
 
 Hozzuk létre a `mogi_bot.xacro` fájlt az urdf mappán belül.
 
@@ -576,7 +574,7 @@ A robot kezdőpozíciója (és orientációja) tetszőlegesen szerkeszthető a l
 
 # Gazebo plugin
 
-Mostmár be tudjuk tölteni a modellünket a fizikai szimulációba, de nem tudjuk megmozdítani még. Ehhez szükségünk van egy Gazebo pluginre. A szimulációban egy differenciálhajtású robotunk lesz két kerékkel, ehhez [ezt](http://gazebosim.org/tutorials?tut=ros_gzplugins#DifferentialDrive) a Gazebo plugint fogjuk használni.
+Most már be tudjuk tölteni a modellünket a fizikai szimulációba, de nem tudjuk megmozdítani még. Ehhez szükségünk van egy Gazebo pluginre. A szimulációban egy differenciálhajtású robotunk lesz két kerékkel, ehhez [ezt](http://gazebosim.org/tutorials?tut=ros_gzplugins#DifferentialDrive) a Gazebo plugint fogjuk használni.
 
 ## Differenciálhajtás
 
@@ -791,13 +789,13 @@ A teleop_twist_keyboard alapból a cmd_vel topicra küldi a Twist üzenetét, í
 
 # TF
 
-A ROS folyamatosan nyílvántartja a robot egyes linkjeinek egymáshoz képesti transzformációit, ezt a TF (transzformáció) modul végzi a már korábban látott `robot_state_publisher` és `joint_state_publisher` segítségével. A linkek között több féle transzformáció lehetséges, ezek közül már sokkal találkoztunk:
+A ROS folyamatosan nyilvántartja a robot egyes linkjeinek egymáshoz képesti transzformációit, ezt a TF (transzformáció) modul végzi a már korábban látott `robot_state_publisher` és `joint_state_publisher` segítségével. A linkek között több féle transzformáció lehetséges, ezek közül már sokkal találkoztunk:
 - fixed, ebben az esetben a transzformáció egy statikus eltolás és/vagy forgatás.
 - revolute és continuous forgó jointok
 - prismatic csúszó jointok
 - floating és planar jointok, amikkel egyelőre nem foglalkozunk
 
-Egy speciális transzformáció az odometria is, ami a robot alvázának (a mi esetünkben a `base_footprint`) elmozdulását mondja meg egy fix koordinátrandszerhez (`odom`) képest. A koordintátarendszer nevét a `differential_drive_controller` adtuk meg. Ameddig a robot mozog ez a transzformáció is folyamatosan változik a `base_footprint` link koordinátarendszere és az `odom` rögzített koordintátarendszer között.
+Egy speciális transzformáció az odometria is, ami a robot alvázának (a mi esetünkben a `base_footprint`) elmozdulását mondja meg egy fix koordinátarendszerhez (`odom`) képest. A koordinátarendszer nevét a `differential_drive_controller` adtuk meg. Ameddig a robot mozog ez a transzformáció is folyamatosan változik a `base_footprint` link koordinátarendszere és az `odom` rögzített koordintátarendszer között.
 
 Egy valódi roboton az odometriát a kerekek jeladói és a robot pontos geometriájának ismeretében tudnánk kiszámítani, ahogy a differenciálhajtásnál már találkoztunk ezzel. Jelen esetben a motorok és a jeladók is a szimuláció részét képezik, tehát a robot odometriáját a Gazebo plugin adja nekünk.
 
@@ -814,7 +812,7 @@ Az eredmény pedig így néz ki:
 
 ## Odometria a ROS-ban
 
-Ha a robot odometria transzformációját fix időpillanatonként rögzítenénk, akkor megkapnánk a robot mozgásának teljes türténetét. Szerencsére erre is van kész megoldás a ROS-ban, a [Hector trajectory server](https://wiki.ros.org/hector_trajectory_server).
+Ha a robot odometria transzformációját fix időpillanatonként rögzítenénk, akkor megkapnánk a robot mozgásának teljes történetét. Szerencsére erre is van kész megoldás a ROS-ban, a [Hector trajectory server](https://wiki.ros.org/hector_trajectory_server).
 
 Ez egy olyan csomag, ami nem része az alap ROS telepítésnek, de az Ubuntu csomagkezelőjével gond nélkül telepíthetjük:
 ```console
@@ -831,7 +829,7 @@ Telepítés után, adjuk hozzá a `spawn_robot.launch` fájlunkhoz a trajektóri
   </node>
 ```
 
-Índítsuk el a szimulációt a `roslaunch bme_gazebo_basics spawn_robot.launch` segítségével, illetve egy másik parancssorban indítsuk el a távirányítást a `roslaunch bme_gazebo_basics teleop.launch` paranccsal.
+Indítsuk el a szimulációt a `roslaunch bme_gazebo_basics spawn_robot.launch` segítségével, illetve egy másik parancssorban indítsuk el a távirányítást a `roslaunch bme_gazebo_basics teleop.launch` paranccsal.
 
 ![alt text][image20]
 
@@ -870,7 +868,7 @@ Színezzük a robot alvázát narancs színűre a kerekeit pedig zöldre.
 ```
 ![alt text][image29]
 
-A robot modell átlátszóságát az `alpha` érték változattásával tudjátok állítani.
+A robot modell átlátszóságát az `alpha` érték változtatásával tudjátok állítani.
 
 ### Gazebo színek
 
@@ -888,7 +886,7 @@ Ugyanúgy színezzük ki a kerekeket zöldre az alvázat pedig narancssárgára.
 
 ## 3D modell, Collada fájl
 
-A robotunk modelljét azonban nem csak táglatestekből és hengerekből építhetjük meg amiket kiszínezhetünk, hanem 3D modelleket is használhatunk. Praktikus azonban a linkek `collision`-jét ilyen egyszerű testeknek megtartani, mert a szimulációnak sokkal kevesebbet kell számolnia, mint egy bonyolul mesh esetén. A `visual` tagben viszont gond nélkül kicserélhetjük.
+A robotunk modelljét azonban nem csak táglatestekből és hengerekből építhetjük meg amiket kiszínezhetünk, hanem 3D modelleket is használhatunk. Praktikus azonban a linkek `collision`-jét ilyen egyszerű testeknek megtartani, mert a szimulációnak sokkal kevesebbet kell számolnia, mint egy bonyolult mesh esetén. A `visual` tagben viszont gond nélkül kicserélhetjük.
 
 Az URDF fájlokban Collada (.dae) vagy STL fájlokat lehet meshként használni. STL esetén sajnos nincs lehetőség a meshen belül különböző színeket használni, ezért a Collada meshek a javasoltak. De hogyan készítünk Collada fájlokat?
 
