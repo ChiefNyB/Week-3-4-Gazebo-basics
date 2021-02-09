@@ -44,6 +44,16 @@
 
 <a href="https://youtu.be/YRHxixKr6r4"><img height="400" src="./assets/youtube.png"></a>
 
+# Tartalomjegyzék
+1. [Gazebo](#Gazebo)
+2. [URDF fájl](#URDF-fájl)
+3. [URDF betöltése (spawn) Gazebo-ba és RViz-be](#URDF-betöltése-(spawn)-Gazebo-ba-és-RViz-be)
+4. [Gazebo plugin](#Gazebo-plugin)
+5. [A robot mozgatása twist üzenettel](#A-robot-mozgatása-`cmd_vel`-twist-üzenettel)
+6. [TF](#TF)
+7. [A robot megjelenése](#A-robot-megjelenése)
+8. [Skid steer (opcionális)](#Skid-steer-(opcionális))
+
 # Gazebo
 
 A Gazebo egy önálló fizikai szimulációs környezet, nem a ROS része, azonban rengeteg csomag segíti az integrációját a ROS-hoz. Jelenleg a 11-es verziónál tart. Melyik verziót használjuk? Mivel az ajánlott konfiguráció Ubuntu 18.04 + ROS Melodic, így a Gazebo 9.0-val dolgozunk, de kisebb módosításokkal minden működhet Ubuntu 20.04 + ROS Noetic és Gazebo 11-gyel is.
