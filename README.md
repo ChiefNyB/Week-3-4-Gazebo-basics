@@ -42,7 +42,7 @@
 
 ## Hova fogunk eljutni?
 
-ToDo: VIDEO
+<a href="https://youtu.be/YRHxixKr6r4"><img height="400" src="./assets/youtube.png"></a>
 
 # Gazebo
 
