@@ -84,7 +84,15 @@ ros-user@ros-virtual-machine:~$ gazebo
 
 libcurl: (51) SSL: no alternative certificate subject name matches target host name 'api.ignitionfuel.org'
 ```
-Ebben az esetben a fenti fájlban a `url: https://api.ignitionfuel.org` sort a `url: https://api.ignitionrobotics.org`-re kell cserélni.
+Ebben az esetben a fenti fájlban a
+```yaml
+url: https://api.ignitionfuel.org
+```
+sort a
+```yaml
+url: https://api.ignitionrobotics.org
+```
+-ra kell cserélni.
 
 
 A `gazebo` parancs a `gzserver` és a `gzclient`-et foglalja össze. A `gzserver` a gazebo backendje, ez végzi a fizikai szimulációt, viszont nincs grafikus felülete. A `gzclient` adja a Gazebo grafikus felületét.
@@ -122,10 +130,23 @@ Egy kis ideig eltart, mire a Gazebo beolvassa a modelleket a szerverről, utána
 
 ## Model editor
 
-Először is hozzunk létre egy ROS csomagot a leckének:  
-`catkin_create_pkg bme_gazebo_basics roscpp rospy std_msgs actionlib actionlib_msgs`
+Mielőtt létrehoznánk az első modellünket, csináljunk egy új ROS csomagot, és innentől kezdve ebben dolgozunk.
 
-Vagy töltsük le GitHub-ról a `git clone` paranccsal.
+Töltsük le a kezdőcsomagot a GitHub-ról a `git clone` paranccsal és a `-b` flaggel, amivel branchet tudunk választani.
+```console
+git clone -b starter-branch https://github.com/MOGI-ROS/Week-3-4-Gazebo-basics.git
+```
+
+Vagy hozzunk létre egy ROS csomagot kézzel a leckének:  
+```console
+catkin_create_pkg bme_gazebo_basics roscpp rospy std_msgs actionlib actionlib_msgs
+```
+
+Ebben az esetben szerkesszük meg a package.xml és CMakeLists.txt fájlokat, és számos egyéb fájlra is szükség lesz, ami a kezdőcsomagban alapból benne van.
+
+---
+
+Nyissuk meg a Gazebot.
 
 A model editort az edit menüben találjátok.
 
@@ -143,8 +164,10 @@ Nyissuk meg a building editort az edit menüből.
 
 Adjuk hozzá a foorplant a `floorplan.png` fájlt az import gomb segítségével.  
 
-Ha a GitHubról töltöttétek le a kezdőcsomagot, akkor ez a `worlds` mappában van, ha teljesen új csomagot csináltatok, akkor így tudjátok letölteni `wget`-tel:  
-`wget https://raw.githubusercontent.com/MOGI-ROS/Week-3-Gazebo-basics/main/bme_gazebo_basics/worlds/floorplan.png`
+Ha a GitHubról töltöttétek le a kezdőcsomagot, akkor ez a `worlds` mappában van, ha teljesen új csomagot csináltatok, akkor így tudjátok letölteni `wget`-tel. A `wget` abba a mappába tölti le a fájlt, ahol futtatjuk, tehát előtte hozzuk létre a csomag alatt a `worlds` mappát, és abból indítsuk a parancsot.
+```console
+wget https://raw.githubusercontent.com/MOGI-ROS/Week-3-Gazebo-basics/main/bme_gazebo_basics/worlds/floorplan.png
+```
 
 
 ![alt text][image7]
@@ -168,10 +191,12 @@ Opcionális: tehetünk bele pár objektumot a Gazebo model libraryből:
 
 ![alt text][image12]
 
-Mentsük el a Gazebo világot world_modified.world néven, ezt fogjuk betölteni Gazebo-ba a szimuláció során.
+Mentsük el a Gazebo világot `world_modified.world` néven, ezt fogjuk betölteni Gazebo-ba a szimuláció során.
 
 Ki is tudjuk próbálni az elmentett világ betöltését Gazeboba:  
-`gazebo world_modified.world`
+```console
+gazebo world_modified.world
+```
 
 
 
@@ -180,9 +205,14 @@ Ki is tudjuk próbálni az elmentett világ betöltését Gazeboba:
 Készítsünk egy launchfile-t `world.launch` néven, ami megnyitja a Gazebot és betölti az elmentett világunkat.
 
 Emlékeztetőül:  
-`roscd bme_gazebo_basics`  
-`cd launch`  
-`touch world.launch`
+```console
+roscd bme_gazebo_basics
+mkdir launch
+cd launch
+touch world.launch
+```
+
+Legyen a launch fájl tartalma a következő:
 
 ```xml
 <?xml version="1.0" encoding="UTF-8"?>
@@ -204,11 +234,15 @@ Emlékeztetőül:
 ```
 
 A már megszokott módon fordítsuk újra a catkin workspace-t a workspace gyökerében, és töltsük be a környezetet:  
-`catkin_make`  
-`source devel/setup.bash`  
+```console
+catkin_make
+source devel/setup.bash
+```
 
-Ezek után el is tudjuk indítani a frissen létrehozott launchfile-unkat, ami megnyitja a Gazebo-t és betölti a világot:  
-`roslaunch bme_gazebo_basics world.launch`
+Ezek után el is tudjuk indítani a frissen létrehozott launchfile-unkat, ami megnyitja a Gazebo-t és betölti a világot:
+```console
+roslaunch bme_gazebo_basics world.launch
+```
 
 ---
 
@@ -219,14 +253,18 @@ Ezek után el is tudjuk indítani a frissen létrehozott launchfile-unkat, ami m
 Az előbb elmentett simple_model sdf formátumban van, ami a Gazebonak ugyan megfelel, azonban a ROS-nak nem. A ROS-nak URDF fájlra van szüksége.
 Megpróbálhatjuk átkonvertálni az sdf fájlokat, de csak a baj lesz vele, tényleg. Érdemes a robotokat urdf/xacro fájlként modellezni, ezeket a ROS és a Gazebo is tudja kezelni. A háttérben a Gazebo egyébként sdf-fé konvertálja az URDF-jeinket, de ezzel nem kell foglalkoznunk.
 
-Itt egy konvertáló tool, ha mégis meg szeretnénk próbálni:
-
-https://github.com/MOGI-ROS/pysdf
+[Itt egy konvertáló tool](https://github.com/MOGI-ROS/pysdf), ha mégis meg szeretnénk próbálni, de a kezdőcsomagban megtaláljátok az átkonvertált fájlt is.
 
 A `git clone` paranccsal tudjátok letölteni a `catkin_ws/src` mappába:  
-`git clone https://github.com/MOGI-ROS/pysdf`  
-`catkin make`  
-`source devel/setup.bash`
+```console
+git clone https://github.com/MOGI-ROS/pysdf
+```
+
+Majd a már megszokott módon fordítsuk újra a catkin workspace-t, és töltsük be a környezetet:  
+```console
+catkin_make
+source devel/setup.bash
+```
 
 A `pysdf`-et ROS csomagként indíthatjuk, és a `-h` segít a paraméterekkel.
 
@@ -244,7 +282,10 @@ optional arguments:
   --no-prefix           Do not use model name as name prefix
 ```
 
-`rosrun pysdf sdf2urdf.py ~/catkin_ws/src/Week-3-4-Gazebo-basics/bme_gazebo_basics/urdf/simple_model/model.sdf ~/catkin_ws/src/Week-3-4-Gazebo-basics/bme_gazebo_basics/urdf/simple_model.urdf`
+A konverzió tehát:
+```console
+rosrun pysdf sdf2urdf.py ~/catkin_ws/src/Week-3-4-Gazebo-basics/bme_gazebo_basics/urdf/simple_model/model.sdf ~/catkin_ws/src/Week-3-4-Gazebo-basics/bme_gazebo_basics/urdf/simple_model.urdf
+```
 
 A konverzió után van még egy kis javítani valónk a két testet összekötő jointtal, ugyanis a következő lépésben hibára futnánk.
 A Gazebo nem végtelenül forgó `continuous` jointtal geneárlta a fájlt, hanem limitált `revolute` jointtal és 10<sup>308</sup>-on radián limittel. Ez a következő nem túl egyértelmű hibát fogja eredményezni:
@@ -282,7 +323,9 @@ Ezek után meg tudjuk nyitni az átkonvertált modellünket!
 
 Az alap ROS telepítésben van egy `urdf_tutorial`, ezt felhasználhatjuk a modellünk megjelenítésére:
 
-`roslaunch urdf_tutorial display.launch model:='$(find bme_gazebo_basics)/urdf/simple_model.urdf'`
+```console
+roslaunch urdf_tutorial display.launch model:='$(find bme_gazebo_basics)/urdf/simple_model.urdf'
+```
 
 Sajnos nem tudjuk módosítani az RViz beállításait, mivel egy read-only csomagot használtunk a megjelenítéshez, ezért készítsünk egy saját launch fájlt az URDF-ünk megnyitására `check_urdf.launch` néven:
 
@@ -316,6 +359,8 @@ Van továbbá 3 olyan argumentuma, ami a launch fájl indításakor command line
 
 Mivel ezeknek a argumentumoknak van default értéke, így ebben az esetben nem kell kitöltenünk, kizárólag a default értékek felülbírására való.
 
+---
+### Paraméterek
 Van továbbá 2 paraméter is a launchfile-ban. Ezek bekerülnek a ROS paraméter szerverébe minden node számára elérhető formában, így szedi össze a robot modelljét az RViz is. A ROS paraméter szerevere a [ROS master része](http://wiki.ros.org/Parameter%20Server). Innen ismeri a joint state publisher és a robot state publisher is az URDF modellünket.
 
 Az éppen futó ROS paramétereinek bármikor meg tudjuk nézni a `rosparam list` paranccsal, valamint egy adott paraméter értékét a `rosparam get /PARAMETER` paranccsal.
@@ -339,9 +384,19 @@ david@DavidsLenovoX1:~$ rosparam list
 david@DavidsLenovoX1:~$ rosparam get /hello
 HELLO WORLD!
 ```
+---
+Ha kézzel hoztuk létre a csomagot, akkor csináljunk egy `rviz` mappát, és abból indítva a `wget`-et töltsük le a leckéhez tartozó RViz config fájlokat:
+```console
+wget https://raw.githubusercontent.com/MOGI-ROS/Week-3-Gazebo-basics/main/bme_gazebo_basics/rviz/simple_model.rviz
+wget https://raw.githubusercontent.com/MOGI-ROS/Week-3-Gazebo-basics/main/bme_gazebo_basics/rviz/mogi_bot.rviz
+wget https://raw.githubusercontent.com/MOGI-ROS/Week-3-Gazebo-basics/main/bme_gazebo_basics/rviz/mogi_world.rviz
+```
 
-Indítsuk is el akkor a launchfile-t:  
-`roslaunch bme_gazebo_basics check_urdf.launch`
+
+Indítsuk is el tehát a launchfile-t:  
+```console
+roslaunch bme_gazebo_basics check_urdf.launch
+```
 
 Az RViz mutatja a modellünket, valamint a transzformációkat.  
 ![alt text][image19]
@@ -439,7 +494,9 @@ Hozzuk létre a `mogi_bot.xacro` fájlt az urdf mappán belül.
 Minden link tartalmaz legalább 1 `inertial`, `collision` és `visual` attribútumokat. A `visual` és `collision` a későbbiek során látjuk majd, hogy eltérhet, mert sok esetben elegendő egy egyszerűbb `collision` modell és egy látványosabb `visual` modell.
 
 Az korábban használt launch fájlunkat felhasználva jelenítsük meg a robotot RViz-ben:  
-`roslaunch bme_gazebo_basics check_urdf.launch model:='$(find bme_gazebo_basics)/urdf/mogi_bot.xacro' rvizconfig:='$(find bme_gazebo_basics)/rviz/mogi_bot.rviz'`
+```console
+roslaunch bme_gazebo_basics check_urdf.launch model:='$(find bme_gazebo_basics)/urdf/mogi_bot.xacro' rvizconfig:='$(find bme_gazebo_basics)/rviz/mogi_bot.rviz'
+```
 
 ![alt text][image13]
 
@@ -520,14 +577,16 @@ Adjunk hozzá 2 kereket is a fájl végére a `</robot>` tag elé. A kerekek `co
 ```
 
 Nyissuk meg ugyanúgy RVizben:  
-`roslaunch bme_gazebo_basics check_urdf.launch model:='$(find bme_gazebo_basics)/urdf/mogi_bot.xacro' rvizconfig:='$(find bme_gazebo_basics)/rviz/mogi_bot.rviz'`
+```console
+roslaunch bme_gazebo_basics check_urdf.launch model:='$(find bme_gazebo_basics)/urdf/mogi_bot.xacro' rvizconfig:='$(find bme_gazebo_basics)/rviz/mogi_bot.rviz'
+```
 
 ![alt text][image14]
 
 
 # URDF betöltése (spawn) Gazebo-ba és RViz-be
 
-Készítsünk egy launchfile-t (`spawn_robot.launch`), ami betölti a robot modellt RVizbe, ahogy az előbb, de beteszi a robotot a fizikai szimulációba is.
+Készítsünk egy launchfile-t `spawn_robot.launch` néven, ami betölti a robot modellt RVizbe, ahogy az előbb, de beteszi a robotot a Gazebo fizikai szimulációjába is.
 
 A `spawn_robot.launch` tartalma:
 
@@ -578,7 +637,9 @@ A `spawn_robot.launch` tartalma:
 A korábbi launchfájlhoz képest egy új node-ot használunk, ez az `spawn_model`, ahogy a neve is mutatja, ez helyezi el az URDF modellünket a Gazebo szimulációban.
 
 A robot kezdőpozíciója (és orientációja) tetszőlegesen szerkeszthető a launchfile-ban, vagy a launchfile indításakor paraméterként, például:  
-`roslaunch bme_gazebo_basics spawn_robot.launch yaw:=1.57`
+```conolse
+roslaunch bme_gazebo_basics spawn_robot.launch yaw:=1.57
+```
 
 ![alt text][image26]
 
@@ -658,7 +719,7 @@ Még a `<link name="base_footprint"></link>` előtt, tehát így kell kinéznie 
 A plugin beállításakor beállítottuk, hogy a szimulált robotunkat a cmd_vel topicon érkező Twist üzenettel lehet vezetni. 
 
 ```xml
-<commandTopic>cmd_vel</commandTopic>                   <!-- Topic to receive geometry_msgs/Twist message commands, defaults to `cmd_vel` -->
+<commandTopic>cmd_vel</commandTopic> <!-- Topic to receive geometry_msgs/Twist message commands, defaults to `cmd_vel` -->
 ```
 
 Innentől kezdve a robotunk egy Twist típusú üzenetet vár és onnantól az irányítása gyakorlatilag megegyezik a Turtlesim vezetésével!
@@ -668,10 +729,14 @@ Akkor tehát használhatjuk a `turtle_teleop_key`-t a robot irányítására?
 Próbáljuk ki!
 
 Indítsuk el a robot szimulációját az előbbi paranccsal:  
-`roslaunch bme_gazebo_basics spawn_robot.launch`
+```console
+roslaunch bme_gazebo_basics spawn_robot.launch
+```
 
-Majd indítsuk el a turtle_teleop_key-t:  
-`rosrun turtlesim turtle_teleop_key`
+Majd indítsuk el a turtle_teleop_key-t:
+```console
+rosrun turtlesim turtle_teleop_key
+```
 
 ## Hibakeresés
 
@@ -712,12 +777,15 @@ Subscriptions:
  * /gazebo/set_model_state [unknown type]
 ```
 
-Megvizsgálhatjuk a problémát a rostopic segítségével is  
+Megvizsgálhatjuk a problémát a `rostopic` segítségével is  
 
-`rostopic list`
+```console
+rostopic list
 
-`rostopic info /turtle1/cmd_vel`
+rostopic info /turtle1/cmd_vel
+```
 
+A válasz:
 ```console
 Type: geometry_msgs/Twist
 
@@ -727,7 +795,7 @@ Publishers:
 Subscribers: None
 ```
 
-valamint `rostopic info /cmd_vel`
+valamint a `rostopic info /cmd_vel` válasza:
 
 ```console
 Type: geometry_msgs/Twist
@@ -769,7 +837,7 @@ Indítsuk el a launchfile-t ls nézzük meg az `rqt_graph` parancsot!
 ![alt text][image17]
 
 A turtle_teleop_key nem igazán praktikus, mert nem tudunk megállni. De van erre egy [megfelelő ROS csomag](http://wiki.ros.org/key_teleop)!  
-Azonban ez sem a cmd_vel topicra küldi a Twist üzeneteit alapból, hanem a key_vel-re. Megváltoztathatnánk a plugin beállításunkat, de inkább tegyük be ezt is a launchfile-ba, és mappeljük át a topicot!
+Azonban ez sem a cmd_vel topicra küldi a Twist üzeneteit alapból, hanem a key_vel-re. Megváltoztathatnánk a plugin beállításunkat, de inkább tegyük be ezt így a launchfile-ba, és mappeljük át a topicot!
 
 ```xml
 <?xml version="1.0" encoding="UTF-8"?>
@@ -943,9 +1011,9 @@ Gazebo esetén azonban meg kell szüntetni a színezést, különben nem látsza
 Cseréljük le a 2 gömbkereket még két kerékre, és csináljunk egy 4 kerekű skid steer robotot. A következő Gazebo plugint lehet használni erre a célra:
 [Skid steer drive](http://gazebosim.org/tutorials?tut=ros_gzplugins#SkidSteeringDrive)
 
-A módosításokat a `mogi_bot_skid_steer.xacro` és a `mogi_bot_skid_steer.gazebo` fájlokban találjátok.
+A módosításokat a [`mogi_bot_skid_steer.xacro`](https://github.com/MOGI-ROS/Week-3-4-Gazebo-basics/blob/main/bme_gazebo_basics/urdf/mogi_bot_skid_steer.xacro) és a [`mogi_bot_skid_steer.gazebo`](https://github.com/MOGI-ROS/Week-3-4-Gazebo-basics/blob/main/bme_gazebo_basics/urdf/mogi_bot_skid_steer.gazebo) fájlokban találjátok.
 
-A `spawn_robot.launch` fájlt el tudjuk indítani a másik modellel a következő paranccsal:
+A `spawn_robot.launch` fájlt el tudjuk indítani a másik modellel a következő argumentummal:
 ```console
 roslaunch bme_gazebo_basics spawn_robot.launch model:='$(find bme_gazebo_basics)/urdf/mogi_bot_skid_steer.xacro'
 ```
