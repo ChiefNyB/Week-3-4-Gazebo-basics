@@ -1,0 +1,18 @@
+<?xml version="1.0"?>
+<robot>
+
+  <gazebo>
+    <plugin name="ros_force_based_move" filename="libgazebo_ros_force_based_move.so">
+      <commandTopic>cmd_vel</commandTopic>
+      <odometryTopic>odom</odometryTopic>
+      <odometryFrame>odom</odometryFrame>
+      <torque_yaw_velocity_p_gain>10000.0</torque_yaw_velocity_p_gain>
+      <force_x_velocity_p_gain>10000.0</force_x_velocity_p_gain>
+      <force_y_velocity_p_gain>10000.0</force_y_velocity_p_gain>
+      <robotBaseFrame>base_footprint</robotBaseFrame>
+      <odometryRate>50.0</odometryRate>
+      <publishOdometryTf>true</publishOdometryTf>
+    </plugin>
+  </gazebo>
+
+</robot>
