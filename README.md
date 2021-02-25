@@ -99,6 +99,18 @@ A `gazebo` parancs a `gzserver` és a `gzclient`-et foglalja össze. A `gzserver
 
 További hivatalos Gazebo tutorialok: [link](http://gazebosim.org/tutorials).
 
+## Miért Gazebo?
+Miért használjuk a Gazebot a szimulációk során? Miért nem használunk például Unity-t vagy Unreal Engine-t?
+A kérdés jogos, és a legegyszerűbb válasz a ROS-hoz történő integrációjuk, ugyanis erre sokáig nem volt semmilyen egyszerű sztenderd megoldás. A Unity azonban 2020 végén jelentette be a hivatalos ROS támogatásukat:
+
+https://blogs.unity3d.com/2020/11/19/robotics-simulation-in-unity-is-as-easy-as-1-2-3/
+
+Ez a jövőben megváltoztathatja azt, hogy mi a legelterjedtebb szimulációs eszköz ROS esetén. Rövid távon viszont egyelőre nem jelent nagy változást, mert a Unity a PhysX game engine-t használja a fizikai szimulációkra, ami ugyan látványos és könnyen kezelhető, de robotok fizikai szimulációjára egyelőre nem alkalmas. A Gazebo emellett nyílt forrású, és a szintén nyílt forrás ODE fizikai engine mellett napjaink több másik kedvelt fizikai engine-jével is lehet használni pl. DART és Bullet!
+
+A fizikai engine-ek összehasonlításáról részletes leírást találtok az `assets` mappán belül a `Simulation of Mobile Robots with Unity.pdf` és a `Comparison of Bullet, Havok, MuJoCo, ODE and PhysX.pdf` fájlokban.
+
+A Gazebo esetén pedig nem csak a ROS-os integráció jól megoldott, de sok előre gyártott plugin áll a rendelkezésünkre robotok hajtásláncának, szabályozóinak és szenzorainak szimulációjára.
+
 ## Gazebo UI
 A Gazebo-t megnyitva a következő képernyőt látjuk:  
 
