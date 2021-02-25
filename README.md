@@ -350,7 +350,7 @@ Sajnos nem tudjuk módosítani az RViz beállításait, mivel egy read-only csom
   <arg name="gui" default="true" />
   <arg name="rvizconfig" default="$(find bme_gazebo_basics)/rviz/simple_model.rviz" />
 
-  <param name="robot_description" command="$(find xacro)/xacro.py $(arg model)" />
+  <param name="robot_description" command="$(find xacro)/xacro $(arg model)" />
   <param name="use_gui" value="$(arg gui)"/>
 
   <node name="joint_state_publisher_gui" pkg="joint_state_publisher_gui" type="joint_state_publisher_gui" />
@@ -624,7 +624,7 @@ A `spawn_robot.launch` tartalma:
   <include file="$(find bme_gazebo_basics)/launch/world.launch"/>
 
   <!-- Find mogi_bot description and send urdf to param server -->
-  <param name="robot_description" command="$(find xacro)/xacro.py $(arg model)" />
+  <param name="robot_description" command="$(find xacro)/xacro $(arg model)" />
 
   <!-- Send joint values-->
   <node name="joint_state_publisher" pkg="joint_state_publisher" type="joint_state_publisher">
