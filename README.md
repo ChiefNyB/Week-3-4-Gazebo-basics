@@ -56,16 +56,16 @@
 
 # Gazebo
 
-A Gazebo egy önálló fizikai szimulációs környezet, nem a ROS része, azonban rengeteg csomag segíti az integrációját a ROS-hoz. Jelenleg a 11-es verziónál tart. Melyik verziót használjuk? Mivel az ajánlott konfiguráció Ubuntu 18.04 + ROS Melodic, így a Gazebo 9.0-val dolgozunk, de kisebb módosításokkal minden működhet Ubuntu 20.04 + ROS Noetic és Gazebo 11-gyel is.
+A Gazebo egy önálló fizikai szimulációs környezet, nem a ROS része, azonban rengeteg csomag segíti az integrációját a ROS-hoz. Jelenleg a 11-es verziónál tart, ez az utolsó Gazebo Classic kiadás, ami 2025-ig támogatott.
 
-| Ubuntu | ROS     | Gazebo |
-|--------|---------|--------|
-| 18.04  | Melodic | 9.0    |
-| 20.04  | Noetic  | 11.1   |
+| Ubuntu    | ROS         | Gazebo  |
+|-----------|-------------|---------|
+| ~~18.04~~ | ~~Melodic~~ | ~~9.0~~ |
+| 20.04     | Noetic      | 11.11   |
 
-Ha a `ros-melodic-desktop-full` csomagot telepítettétek, akkor a Gazebo már telepítve van.
+Ha a `ros-noetic-desktop-full` csomagot telepítettétek, akkor a Gazebo már telepítve van.
 
-Ha valamiért még sincs telepítve akkor a `sudo apt install gazebo9` vagy `gazebo11` paranccsal tudjátok telepíteni.  
+Ha valamiért még sincs telepítve akkor a `sudo apt install gazebo11`  paranccsal tudjátok telepíteni.  
 A Gazebo-t a `gazebo` paranccsal tudjuk elindítani. És a következő képernyővel indul:  
 ![alt text][image1]
 
@@ -77,23 +77,21 @@ VMware: vmw_ioctl_command error Invalid argument.
 
 Akkor be kell állítani az `export SVGA_VGPU10=0` környezeti változót. Érdemes betenni a `./bashrc` fájlba ebben az esetben.
 
-Gazebo 9 esetén még egy teendőnk van, a `~/.ignition/fuel/config.yaml` fájl szerkesztése, ha a Gazebo indulásakor a következő hibát látjátok:
-```console
-ros-user@ros-virtual-machine:~$ gazebo
-[Err] [REST.cc:205] Error in REST request
-
-libcurl: (51) SSL: no alternative certificate subject name matches target host name 'api.ignitionfuel.org'
-```
-Ebben az esetben a fenti fájlban a
-```yaml
-url: https://api.ignitionfuel.org
-```
-sort a
-```yaml
-url: https://api.ignitionrobotics.org
-```
--ra kell cserélni.
-
+>Gazebo 9 esetén még egy teendőnk van, a `~/.ignition/fuel/config.yaml` fájl szerkesztése, ha a Gazebo indulásakor a következő hibát látjátok:
+>```console
+>ros-user@ros-virtual-machine:~$ gazebo
+>[Err] [REST.cc:205] Error in REST request
+>
+>libcurl: (51) SSL: no alternative certificate subject name matches target host name 'api.ignitionfuel.org'
+>```
+>Ebben az esetben a fenti fájlban a
+>```yaml
+>url: https://api.ignitionfuel.org
+>```
+>sort a következőre kell cserélni:
+>```yaml
+>url: https://api.ignitionrobotics.org
+>```
 
 A `gazebo` parancs a `gzserver` és a `gzclient`-et foglalja össze. A `gzserver` a gazebo backendje, ez végzi a fizikai szimulációt, viszont nincs grafikus felülete. A `gzclient` adja a Gazebo grafikus felületét.
 
@@ -101,11 +99,11 @@ További hivatalos Gazebo tutorialok: [link](http://gazebosim.org/tutorials).
 
 ## Miért Gazebo?
 Miért használjuk a Gazebot a szimulációk során? Miért nem használunk például Unity-t vagy Unreal Engine-t?
-A kérdés jogos, és a legegyszerűbb válasz a ROS-hoz történő integrációjuk, ugyanis erre sokáig nem volt semmilyen egyszerű sztenderd megoldás. A Unity azonban 2020 végén jelentette be a hivatalos ROS támogatásukat:
+A kérdés jogos, és a legegyszerűbb válasz a ROS-hoz történő integrációjuk, ugyanis erre sokáig nem volt semmilyen egyszerű sztenderd megoldás. A Unity 2020 végén jelentette be a hivatalos ROS támogatásukat, de ez sem hozott jelentős változást:
 
 https://blogs.unity3d.com/2020/11/19/robotics-simulation-in-unity-is-as-easy-as-1-2-3/
 
-Ez a jövőben megváltoztathatja azt, hogy mi a legelterjedtebb szimulációs eszköz ROS esetén. Rövid távon viszont egyelőre nem jelent nagy változást, mert a Unity a PhysX game engine-t használja a fizikai szimulációkra, ami ugyan látványos és könnyen kezelhető, de robotok fizikai szimulációjára egyelőre nem alkalmas. A Gazebo emellett nyílt forrású, és a szintén nyílt forrás ODE fizikai engine mellett napjaink több másik kedvelt fizikai engine-jével is lehet használni pl. DART és Bullet!
+A Unity a PhysX game engine-t használja a fizikai szimulációkra, ami ugyan látványos és könnyen kezelhető, de robotok fizikai szimulációjára egyelőre nem alkalmas. A Gazebo emellett nyílt forrású, és a szintén nyílt forrású ODE fizikai engine mellett napjaink több másik kedvelt fizikai engine-jével is lehet használni pl. DART és Bullet!
 
 A fizikai engine-ek összehasonlításáról részletes leírást találtok az `assets` mappán belül a `Simulation of Mobile Robots with Unity.pdf` és a `Comparison of Bullet, Havok, MuJoCo, ODE and PhysX.pdf` fájlokban.
 
@@ -906,7 +904,7 @@ Ha a robot odometria transzformációját fix időpillanatonként rögzítenénk
 
 Ez egy olyan csomag, ami nem része az alap ROS telepítésnek, de az Ubuntu csomagkezelőjével gond nélkül telepíthetjük:
 ```console
-sudo apt install ros-melodic-hector-trajectory-server
+sudo apt install ros-noetic-hector-trajectory-server
 ```
 
 Telepítés után, adjuk hozzá a `spawn_robot.launch` fájlunkhoz a trajektória mentését a `hector_trajectory_server` node hozzáadásával. A node használatához 2 dolgot kell beállítanunk, a két koordinátarendszert, amik között a transzformációt rögzíteni szeretnénk.
@@ -983,6 +981,9 @@ Az URDF fájlokban Collada (.dae) vagy STL fájlokat lehet meshként használni.
 Sajnos a CAD szoftverek nem exportálnak Collada formátumba, ezért ezek előállítására a Blendert javaslom.
 
 Ha CAD SW-ből exportáltok STL-t, amit aztán Blenderrel alakítotok át Collada mesh-sé, akkor javaslom, hogy minden méretezést és forgatást Blenderben csináljatok meg, ahogy a színezést is.
+
+>Itt láthattok egy korábbi konzultációs videót a Blender használatáról:
+><a href="https://youtu.be/K5v3cWsks8w"><img height="300" src="./assets/blender-yt.png"></a>
 
 ![alt text][image31]
 
