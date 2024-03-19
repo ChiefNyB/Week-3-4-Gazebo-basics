@@ -3,7 +3,7 @@
 <launch>
 
   <!-- World File -->
-  <arg name="world_file" default="$(find bme_gazebo_basics)/worlds/flat1_modified.world"/>
+  <arg name="world_file" default="$(find bme_gazebo_basics)/worlds/world_modified.world"/>
 
   <!-- Launch Gazebo World -->
   <include file="$(find gazebo_ros)/launch/empty_world.launch">

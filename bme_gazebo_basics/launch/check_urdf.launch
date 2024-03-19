@@ -2,7 +2,7 @@
 
 <launch>
 
-  <arg name="model" default="$(find bme_gazebo_basics)/urdf/simple_model.urdf"/> <!-- Az arg olyan mint egy default változó, felülírható -->
+  <arg name="model" default="$(find bme_gazebo_basics)/urdf/simple_model.urdf"/>
   <arg name="gui" default="true" />
   <arg name="rvizconfig" default="$(find bme_gazebo_basics)/rviz/simple_model.rviz" />
 
@@ -12,7 +12,5 @@
   <node name="joint_state_publisher_gui" pkg="joint_state_publisher_gui" type="joint_state_publisher_gui" />
   <node name="robot_state_publisher" pkg="robot_state_publisher" type="robot_state_publisher" />
   <node name="rviz" pkg="rviz" type="rviz" args="-d $(arg rvizconfig)" required="true" />
-
-  <param name="hello" value="HELLO WORLD!"/> <!-- a paraméterszerverre feltölti (a masterre) ezt a cuccot-->
 
 </launch>
